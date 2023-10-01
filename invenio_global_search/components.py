@@ -13,13 +13,59 @@ from flask_principal import Identity
 from invenio_records_dublin_core import DublinCoreRecord, current_records_dublin_core
 from invenio_records_resources.services.records.components import ServiceComponent
 
+from .serializers import (
+    LOMRecordJSONSerializer,
+    Marc21RecordJSONSerializer,
+    RDMRecordJSONSerializer,
+)
+
 
 class Marc21ToDublinCoreComponent(ServiceComponent):
     """Marc21ToDublinCoreComponent."""
 
+    def publish(
+        self,
+        identity: Identity,
+        data: dict | None = None,
+        record: DublinCoreRecord | None = None,
+        **kwargs: dict,
+    ) -> None:
+        """Create handler."""
+        record_serializer = Marc21RecordJSONSerializer()
+        metadata = record_serializer.dump_obj(record.metadata)
+        data = {"metadata": metadata}
+        current_records_dublin_core.record_service.create(
+            identity=identity,
+            data=data,
+        )
+
 
 class LOMToDublinCoreComponent(ServiceComponent):
     """LOMToDublinCoreComponent."""
+
+    def publish(
+        self,
+        identity: Identity,
+        data: dict | None = None,
+        record: DublinCoreRecord | None = None,
+        **kwargs: dict,
+    ) -> None:
+        """Create handler."""
+        record_serializer = LOMRecordJSONSerializer()
+        metadata = record_serializer.dump_obj(record)
+        pid = record["id"]
+        original = {
+            "view": f"lom/{pid}",
+            "schema": "lom",
+        }
+        data = {
+            "metadata": metadata,
+            "original": original,
+        }
+        current_records_dublin_core.record_service.create(
+            identity=identity,
+            data=data,
+        )
 
 
 class RDMToDublinCoreComponent(ServiceComponent):
@@ -33,11 +79,17 @@ class RDMToDublinCoreComponent(ServiceComponent):
         **kwargs: dict,
     ) -> None:
         """Create handler."""
-        title = record.metadata["title"]
+        record_serializer = RDMRecordJSONSerializer()
+        print(f"RDMToDublinCoreComponent.publish record: {record}")
+        metadata = record_serializer.dump_obj(record)
+        pid = record["id"]
+        original = {
+            "view": f"records/{pid}",
+            "schema": "rdm",
+        }
         data = {
-            "metadata": {
-                "title": title,
-            },
+            "metadata": metadata,
+            "original": original,
         }
         current_records_dublin_core.record_service.create(
             identity=identity,

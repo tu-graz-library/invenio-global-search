@@ -8,84 +8,147 @@
 """Global Search Marc21 schema."""
 
 from flask_resources.serializers import BaseSerializerSchema
+from invenio_records_marc21.services.record import Marc21Metadata
 from marshmallow import fields
 
 
 class Marc21RecordSchema(BaseSerializerSchema):
     """RDMRecordsSerializer."""
 
-    contributor = fields.Method("get_contributor")
-    title = fields.Method("get_title")
-    creator = fields.Method("get_creator")
-    identifier = fields.Method("get_identifier")
-    relation = fields.Method("get_relation")
-    right = fields.Method("get_right")
-    date = fields.Method("get_date")
-    subject = fields.Method("get_subject")
-    description = fields.Method("get_description")
-    publisher = fields.Method("get_publisher")
-    type = fields.Method("get_type")
-    source = fields.Method("get_source")
-    language = fields.Method("get_language")
-    location = fields.Method("get_location")
-    format = fields.Method("get_format")
+    contributors = fields.Method("get_contributors")
+    titles = fields.Method("get_titles")
+    creators = fields.Method("get_creators")
+    identifiers = fields.Method("get_identifiers")
+    relations = fields.Method("get_relations")
+    rights = fields.Method("get_rights")
+    dates = fields.Method("get_dates")
+    subjects = fields.Method("get_subjects")
+    descriptions = fields.Method("get_descriptions")
+    publishers = fields.Method("get_publishers")
+    types = fields.Method("get_types")
+    sources = fields.Method("get_sources")
+    languages = fields.Method("get_languages")
+    locations = fields.Method("get_locations")
+    formats = fields.Method("get_formats")
+    coverages = fields.Method("get_coverages")
 
-    def get_contributor(self, obj: dict) -> str:
+    def _extract(self, selectors: list[str], marc21: Marc21Metadata) -> list[str]:
+        """Extract."""
+        ret = []
+        for selector in selectors:
+            ret += marc21.get_values(*selector.split("."))
+        return ret
+
+    def get_contributors(self, marc21: Marc21Metadata) -> list:
         """Get contributors."""
-        return ""
+        # 100, 110, 111, 700, 710, 711, 720
+        selectors = ["100", "110", "111", "700", "710", "711", "720"]
+        return self._extract(selectors, marc21)
 
-    def get_title(self, obj: dict) -> str:
+    def get_titles(self, marc21: Marc21Metadata) -> list:
         """Get titles."""
-        return ""
+        # 245, 246
+        # return marc21.get_values("245") + marc21.get_values("246")
+        selectors = ["245", "246"]
+        return self._extract(selectors, marc21)
 
-    def get_creator(self, obj: dict) -> str:
+    def get_creators(self, marc21: Marc21Metadata) -> list:
         """Get creators."""
-        return ""
+        return []
 
-    def get_identifier(self, obj: dict) -> str:
+    def get_identifiers(self, marc21: Marc21Metadata) -> list:
         """Get identifiers."""
-        return ""
+        # 020$a, 022$a, 024$a, 856$u
+        selectors = ["020...a", "022...a", "024...a", "856...u"]
+        return self._extract(selectors, marc21)
 
-    def get_relation(self, obj: dict) -> str:
+    def get_relations(self, marc21: Marc21Metadata) -> list:
         """Get relations."""
-        return ""
+        # 530, 760-787$o$t
+        selectors = ["530"]
+        return self._extract(selectors, marc21)
 
-    def get_right(self, obj: dict) -> str:
+    def get_rights(self, marc21: Marc21Metadata) -> list:
         """Get rights."""
-        return ""
+        # 506, 540
+        selectors = ["506", "540"]
+        return self._extract(selectors, marc21)
 
-    def get_date(self, obj: dict) -> str:
+    def get_dates(self, marc21: Marc21Metadata) -> list:
         """Get dates."""
-        return ""
+        # 008/07-10, 260$c$g
+        selectors = ["260...c", "260...g"]
+        return self._extract(selectors, marc21)
 
-    def get_subject(self, obj: dict) -> str:
+    def get_subjects(self, marc21: Marc21Metadata) -> list:
         """Get subjects."""
-        return ""
+        # 050, 060, 080, 082, 600, 610, 611, 630, 650, 653
+        selectors = [
+            "050",
+            "060",
+            "080",
+            "082",
+            "600",
+            "610",
+            "611",
+            "630",
+            "650",
+            "653",
+        ]
+        return self._extract(selectors, marc21)
 
-    def get_description(self, obj: dict) -> str:
+    def get_descriptions(self, marc21: Marc21Metadata) -> list:
         """Get descriptions."""
-        return ""
+        # 500-599, except 506,530,540,546
+        selectors = [str(i) for i in range(500, 600) if i not in [506, 530, 540, 546]]
+        return self._extract(selectors, marc21)
 
-    def get_publisher(self, obj: dict) -> str:
+    def get_publishers(self, marc21: Marc21Metadata) -> list:
         """Get publishers."""
-        return ""
+        # 546, 260$a$b
+        selectors = ["546", "260...a", "260...b"]
+        return self._extract(selectors, marc21)
 
-    def get_type(self, obj: dict) -> str:
+    def get_types(self, marc21: Marc21Metadata) -> list:
         """Get types."""
-        return ""
+        # leader06, leader07, 655
+        selectors = ["655"]
+        return self._extract(selectors, marc21)
 
-    def get_source(self, obj: dict) -> str:
+    def get_sources(self, marc21: Marc21Metadata) -> list:
         """Get soruces."""
-        return ""
+        # 534$t, 786$o$t
+        selectors = ["534...t", "786...o", "786...t"]
+        return self._extract(selectors, marc21)
 
-    def get_language(self, obj: dict) -> str:
+    def get_languages(self, marc21: Marc21Metadata) -> list:
         """Get languages."""
-        return ""
+        # 008/35-37, 041$a$b$d$e$f$g$h$j
+        selectors = [
+            "041...a",
+            "041...b",
+            "041...d",
+            "041...e",
+            "041...e",
+            "041...f",
+            "041...g",
+            "041...h",
+            "041...i",
+        ]
+        return self._extract(selectors, marc21)
 
-    def get_location(self, obj: dict) -> str:
+    def get_locations(self, marc21: Marc21Metadata) -> list:
         """Get locations."""
-        return ""
+        return []
 
-    def get_format(self, obj: dict) -> str:
+    def get_formats(self, marc21: Marc21Metadata) -> list:
         """Get formats."""
-        return ""
+        # 340, 856$q
+        selectors = ["340", "856...q"]
+        return self._extract(selectors, marc21)
+
+    def get_coverages(self, marc21: Marc21Metadata) -> list:
+        """Get coverages."""
+        # 651, 662, 751, 752
+        selectors = ["651", "662", "751", "752"]
+        return self._extract(selectors, marc21)

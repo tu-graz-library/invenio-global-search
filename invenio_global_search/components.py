@@ -17,6 +17,7 @@ from invenio_rdm_records.resources.serializers.dublincore import (
     DublinCoreJSONSerializer,
 )
 from invenio_records_dublin_core import current_records_dublin_core
+from invenio_records_marc21.services.record import Marc21Metadata
 from invenio_records_resources.services.records.components import ServiceComponent
 from invenio_records_resources.services.uow import Operation
 
@@ -38,6 +39,29 @@ class ComponentOp(Operation):
 
 class Marc21ToDublinCoreComponent(ServiceComponent):
     """Marc21ToDublinCoreComponent."""
+
+    def create(self, identity, data=None, record=None, draft=None, errors=None):
+        """Create."""
+        print(
+            f"components.py create data: {data}, draft: {draft}, record:{record}, errors: {errors}"
+        )
+        record_serializer = Marc21RecordJSONSerializer()
+        marc21 = Marc21Metadata(json=data["metadata"])
+        # data = record.dumps()
+        metadata = record_serializer.dump_obj(marc21)
+        print(f"components.py create metadata: {metadata}")
+
+    def update_draft(self, identity, data=None, record=None, errors=None):
+        """Update draft."""
+        print(f"components.py update_draft data: {data}")
+        record_serializer = Marc21RecordJSONSerializer()
+        # data = record.dumps()
+        metadata = record_serializer.dump_obj(data)
+        print(f"components.py update_draft metadata: {metadata}")
+
+    def edit(self, identity, draft=None, record=None):
+        """Edit."""
+        print(f"components.py edit draft: {draft}, record: {record}")
 
     def publish(
         self,

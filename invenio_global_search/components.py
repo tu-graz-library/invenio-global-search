@@ -9,15 +9,31 @@
 
 from __future__ import annotations
 
-from flask_principal import Identity
-from invenio_records_dublin_core import DublinCoreRecord, current_records_dublin_core
-from invenio_records_resources.services.records.components import ServiceComponent
+from collections.abc import Callable
 
-from .serializers import (
-    LOMRecordJSONSerializer,
-    Marc21RecordJSONSerializer,
-    RDMRecordJSONSerializer,
+from flask_principal import Identity
+from invenio_rdm_records.records.api import RDMDraft, RDMRecord
+from invenio_rdm_records.resources.serializers.dublincore import (
+    DublinCoreJSONSerializer,
 )
+from invenio_records_dublin_core import current_records_dublin_core
+from invenio_records_resources.services.records.components import ServiceComponent
+from invenio_records_resources.services.uow import Operation
+
+from .serializers import LOMRecordJSONSerializer, Marc21RecordJSONSerializer
+
+
+class ComponentOp(Operation):
+    """ComponentOp."""
+
+    def __init__(self, record: RDMRecord, func: Callable) -> None:
+        """Construct."""
+        self._record = record
+        self._func = func
+
+    def on_post_commit(self, uow) -> None:  # noqa: ARG002
+        """Post commit."""
+        self._func(self._record)
 
 
 class Marc21ToDublinCoreComponent(ServiceComponent):
@@ -26,18 +42,31 @@ class Marc21ToDublinCoreComponent(ServiceComponent):
     def publish(
         self,
         identity: Identity,
-        data: dict | None = None,
-        record: DublinCoreRecord | None = None,
-        **kwargs: dict,
+        data: dict | None = None,  # noqa: ARG002
+        record: RDMRecord | None = None,
+        **_: dict,
     ) -> None:
         """Create handler."""
-        record_serializer = Marc21RecordJSONSerializer()
-        metadata = record_serializer.dump_obj(record.metadata)
-        data = {"metadata": metadata}
-        current_records_dublin_core.record_service.create(
-            identity=identity,
-            data=data,
-        )
+
+        def func(record: RDMRecord) -> None:
+            record_serializer = Marc21RecordJSONSerializer()
+            data = record.dumps()
+            metadata = record_serializer.dump_obj(data)
+            pid = record["id"]
+            original = {
+                "view": f"marc21/{pid}",
+                "schema": "marc21",
+            }
+            data = {
+                "metadata": metadata,
+                "original": original,
+            }
+            current_records_dublin_core.record_service.create(
+                identity=identity,
+                data=data,
+            )
+
+        self.uow.register(ComponentOp(record, func=func))
 
 
 class LOMToDublinCoreComponent(ServiceComponent):
@@ -46,26 +75,31 @@ class LOMToDublinCoreComponent(ServiceComponent):
     def publish(
         self,
         identity: Identity,
-        data: dict | None = None,
-        record: DublinCoreRecord | None = None,
-        **kwargs: dict,
+        data: dict | None = None,  # noqa: ARG002
+        record: RDMRecord | None = None,
+        **_: dict,
     ) -> None:
         """Create handler."""
-        record_serializer = LOMRecordJSONSerializer()
-        metadata = record_serializer.dump_obj(record)
-        pid = record["id"]
-        original = {
-            "view": f"lom/{pid}",
-            "schema": "lom",
-        }
-        data = {
-            "metadata": metadata,
-            "original": original,
-        }
-        current_records_dublin_core.record_service.create(
-            identity=identity,
-            data=data,
-        )
+
+        def func(record: RDMRecord) -> None:
+            record_serializer = LOMRecordJSONSerializer()
+            data = record.dumps()
+            metadata = record_serializer.dump_obj(data)
+            pid = record["id"]
+            original = {
+                "view": f"lom/{pid}",
+                "schema": "lom",
+            }
+            data = {
+                "metadata": metadata,
+                "original": original,
+            }
+            current_records_dublin_core.record_service.create(
+                identity=identity,
+                data=data,
+            )
+
+        self.uow.register(ComponentOp(record, func=func))
 
 
 class RDMToDublinCoreComponent(ServiceComponent):
@@ -74,24 +108,30 @@ class RDMToDublinCoreComponent(ServiceComponent):
     def publish(
         self,
         identity: Identity,
-        data: dict | None = None,
-        record: DublinCoreRecord | None = None,
-        **kwargs: dict,
+        data: dict | None = None,  # noqa: ARG002
+        record: RDMRecord | None = None,
+        draft: RDMDraft | None = None,
+        **_: dict,
     ) -> None:
         """Create handler."""
-        record_serializer = RDMRecordJSONSerializer()
-        print(f"RDMToDublinCoreComponent.publish record: {record}")
-        metadata = record_serializer.dump_obj(record)
-        pid = record["id"]
-        original = {
-            "view": f"records/{pid}",
-            "schema": "rdm",
-        }
-        data = {
-            "metadata": metadata,
-            "original": original,
-        }
-        current_records_dublin_core.record_service.create(
-            identity=identity,
-            data=data,
-        )
+
+        def func(record: RDMRecord) -> None:
+            record_serializer = DublinCoreJSONSerializer()
+            data = record.dumps()
+            metadata = record_serializer.dump_obj(data)
+            pid = record["id"]
+            original = {
+                "view": f"records/{pid}",
+                "schema": "rdm",
+            }
+            data = {
+                "metadata": metadata,
+                "original": original,
+            }
+            current_records_dublin_core.record_service.create(
+                identity=identity,
+                data=data,
+            )
+
+        if draft["access"]["record"] == "public":
+            self.uow.register(ComponentOp(record, func=func))

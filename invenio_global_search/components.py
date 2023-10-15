@@ -22,19 +22,66 @@ from invenio_records_resources.services.records.components import ServiceCompone
 from invenio_records_resources.services.uow import Operation
 
 from .serializers import LOMRecordJSONSerializer, Marc21RecordJSONSerializer
+from .utils import LOMMetadata
+
+
+def map_metadata_from_a_to_b(
+    record,
+    serializer_cls=None,
+    metadata_cls=None,
+    schema=None,
+    identity=None,
+) -> None:
+    """Func."""
+    record_serializer = serializer_cls()
+    data = record.dumps()
+    obj = metadata_cls(json=data["metadata"]) if metadata_cls else data
+    metadata = record_serializer.dump_obj(obj)
+    pid = record["id"]
+    path = schema if schema != "rdm" else "records"
+    original = {
+        "view": f"{path}/{pid}",
+        "schema": schema,
+    }
+    data = {
+        "metadata": metadata,
+        "original": original,
+    }
+    current_records_dublin_core.records_service.create(
+        identity=identity,
+        data=data,
+    )
 
 
 class ComponentOp(Operation):
     """ComponentOp."""
 
-    def __init__(self, record: RDMRecord, func: Callable) -> None:
+    def __init__(
+        self,
+        record: RDMRecord,
+        func: Callable = map_metadata_from_a_to_b,
+        serializer_cls=None,
+        metadata_cls=None,
+        schema=None,
+        identity=None,
+    ) -> None:
         """Construct."""
         self._record = record
         self._func = func
+        self._serializer_cls = serializer_cls
+        self._metadata_cls = metadata_cls
+        self._schema = schema
+        self._identity = identity
 
     def on_post_commit(self, uow) -> None:  # noqa: ARG002
         """Post commit."""
-        self._func(self._record)
+        self._func(
+            self._record,
+            self._serializer_cls,
+            self._metadata_cls,
+            self._schema,
+            self._identity,
+        )
 
 
 class Marc21ToDublinCoreComponent(ServiceComponent):
@@ -55,13 +102,14 @@ class Marc21ToDublinCoreComponent(ServiceComponent):
         """Update draft."""
         print(f"components.py update_draft data: {data}")
         record_serializer = Marc21RecordJSONSerializer()
-        # data = record.dumps()
-        metadata = record_serializer.dump_obj(data)
+        data = record.dumps()
+        marc21 = Marc21Metadata(json=data["metadata"])
+        metadata = record_serializer.dump_obj(marc21)
         print(f"components.py update_draft metadata: {metadata}")
 
     def edit(self, identity, draft=None, record=None):
         """Edit."""
-        print(f"components.py edit draft: {draft}, record: {record}")
+        # print(f"components.py edit draft: {draft}, record: {record}")
 
     def publish(
         self,
@@ -71,26 +119,14 @@ class Marc21ToDublinCoreComponent(ServiceComponent):
         **_: dict,
     ) -> None:
         """Create handler."""
-
-        def func(record: RDMRecord) -> None:
-            record_serializer = Marc21RecordJSONSerializer()
-            data = record.dumps()
-            metadata = record_serializer.dump_obj(data)
-            pid = record["id"]
-            original = {
-                "view": f"marc21/{pid}",
-                "schema": "marc21",
-            }
-            data = {
-                "metadata": metadata,
-                "original": original,
-            }
-            current_records_dublin_core.record_service.create(
-                identity=identity,
-                data=data,
-            )
-
-        self.uow.register(ComponentOp(record, func=func))
+        cmp_op = ComponentOp(
+            record,
+            serializer_cls=Marc21RecordJSONSerializer,
+            metadata_cls=Marc21Metadata,
+            schema="marc21",
+            identity=identity,
+        )
+        self.uow.register(cmp_op)
 
 
 class LOMToDublinCoreComponent(ServiceComponent):
@@ -104,26 +140,14 @@ class LOMToDublinCoreComponent(ServiceComponent):
         **_: dict,
     ) -> None:
         """Create handler."""
-
-        def func(record: RDMRecord) -> None:
-            record_serializer = LOMRecordJSONSerializer()
-            data = record.dumps()
-            metadata = record_serializer.dump_obj(data)
-            pid = record["id"]
-            original = {
-                "view": f"lom/{pid}",
-                "schema": "lom",
-            }
-            data = {
-                "metadata": metadata,
-                "original": original,
-            }
-            current_records_dublin_core.record_service.create(
-                identity=identity,
-                data=data,
-            )
-
-        self.uow.register(ComponentOp(record, func=func))
+        cmp_op = ComponentOp(
+            record,
+            serializer_cls=LOMRecordJSONSerializer,
+            metadata_cls=LOMMetadata,
+            schema="lom",
+            identity=identity,
+        )
+        self.uow.register(cmp_op)
 
 
 class RDMToDublinCoreComponent(ServiceComponent):
@@ -138,24 +162,13 @@ class RDMToDublinCoreComponent(ServiceComponent):
         **_: dict,
     ) -> None:
         """Create handler."""
+        if draft["access"]["record"] != "public":
+            return
 
-        def func(record: RDMRecord) -> None:
-            record_serializer = DublinCoreJSONSerializer()
-            data = record.dumps()
-            metadata = record_serializer.dump_obj(data)
-            pid = record["id"]
-            original = {
-                "view": f"records/{pid}",
-                "schema": "rdm",
-            }
-            data = {
-                "metadata": metadata,
-                "original": original,
-            }
-            current_records_dublin_core.record_service.create(
-                identity=identity,
-                data=data,
-            )
-
-        if draft["access"]["record"] == "public":
-            self.uow.register(ComponentOp(record, func=func))
+        cmp_op = ComponentOp(
+            record,
+            serializer_cls=DublinCoreJSONSerializer,
+            schema="rdm",
+            identity=identity,
+        )
+        self.uow.register(cmp_op)

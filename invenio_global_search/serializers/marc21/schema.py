@@ -30,7 +30,6 @@ class Marc21RecordSchema(BaseSerializerSchema):
     languages = fields.Method("get_languages")
     locations = fields.Method("get_locations")
     formats = fields.Method("get_formats")
-    coverages = fields.Method("get_coverages")
 
     def _extract(self, selectors: list[str], marc21: Marc21Metadata) -> list[str]:
         """Extract."""
@@ -145,10 +144,4 @@ class Marc21RecordSchema(BaseSerializerSchema):
         """Get formats."""
         # 340, 856$q
         selectors = ["340", "856...q"]
-        return self._extract(selectors, marc21)
-
-    def get_coverages(self, marc21: Marc21Metadata) -> list:
-        """Get coverages."""
-        # 651, 662, 751, 752
-        selectors = ["651", "662", "751", "752"]
         return self._extract(selectors, marc21)

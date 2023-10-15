@@ -10,84 +10,117 @@
 from flask_resources.serializers import BaseSerializerSchema
 from marshmallow import fields
 
+from ...utils import LOMMetadata
+
+
+def get_text(obj: dict) -> str:
+    """Get text from langstring."""
+    return obj["langstring"]["#text"]
+
 
 class LOMRecordSchema(BaseSerializerSchema):
     """RDMRecordsSerializer."""
 
-    # contributor = fields.Method("get_contributor")
-    title = fields.Method("get_title")
-    creator = fields.Method("get_creator")
-    identifier = fields.Method("get_identifier")
-    # relation = fields.Method("get_relation")
-    right = fields.Method("get_right")
-    # date = fields.Method("get_date")
-    # subject = fields.Method("get_subject")
-    # description = fields.Method("get_description")
-    # publisher = fields.Method("get_publisher")
-    # type = fields.Method("get_type")
-    # source = fields.Method("get_source")
-    # language = fields.Method("get_language")
-    # location = fields.Method("get_location")
-    # format = fields.Method("get_format")
+    contributors = fields.Method("get_contributors")
+    titles = fields.Method("get_titles")
+    creators = fields.Method("get_creators")
+    identifiers = fields.Method("get_identifiers")
+    relations = fields.Method("get_relations")
+    rights = fields.Method("get_rights")
+    dates = fields.Method("get_dates")
+    subjects = fields.Method("get_subjects")
+    descriptions = fields.Method("get_descriptions")
+    publishers = fields.Method("get_publishers")
+    types = fields.Method("get_types")
+    sources = fields.Method("get_sources")
+    languages = fields.Method("get_languages")
+    locations = fields.Method("get_locations")
+    formats = fields.Method("get_formats")
 
-    def get_contributor(self, obj: dict) -> str:
+    def get_contributors(self, lom: LOMMetadata) -> list:
         """Get contributors."""
-        return ""
+        contributors = []
+        for contribute in lom["lifecycle.contribute"]:
+            if "entity" in contribute:
+                contributors += contribute["entity"]
+        return contributors
 
-    def get_title(self, obj: dict) -> str:
+    def get_titles(self, lom: LOMMetadata) -> list:
         """Get titles."""
-        return obj["metadata"]["general"]["title"]["langstring"]["#text"]
+        return [lom["general.title.langstring.#text"]]
 
-    def get_creator(self, obj: dict) -> str:
+    def get_creators(self, lom: LOMMetadata) -> list:
         """Get creators."""
-        return obj["metadata"]["lifecycle"]["contribute"][0]["entity"][0]
+        creators = []
+        for contribute in lom["lifecycle.contribute"]:
+            if "entity" in contribute:
+                creators += contribute["entity"]
+        return creators
 
-    def get_identifier(self, obj: dict) -> str:
+    def get_identifiers(self, lom: LOMMetadata) -> list:
         """Get identifiers."""
-        return "DOI"
+        return [get_text(entry["entry"]) for entry in lom["general.identifier"]]
 
-    def get_relation(self, obj: dict) -> str:
+    def get_relations(self, lom: LOMMetadata) -> list:
         """Get relations."""
-        return ""
+        relations = []
+        for relation in lom["relation"]:
+            if "resource" in relation and "description" in relation["resource"]:
+                relations += get_text(relation["resource"]["description"][0])
+        return relations
 
-    def get_right(self, obj: dict) -> str:
+    def get_rights(self, lom: LOMMetadata) -> list:
         """Get rights."""
-        return "CC BY"
+        return [lom["rights.url"]]
 
-    def get_date(self, obj: dict) -> str:
+    def get_dates(self, lom: LOMMetadata) -> list:
         """Get dates."""
-        return ""
+        dates = []
+        for contribute in lom["lifecycle.contribute"]:
+            if "date" in contribute and "datetime" in contribute["date"]:
+                dates += contribute["date"]["datetime"]
+        return dates
 
-    def get_subject(self, obj: dict) -> str:
+    def get_subjects(self, lom: LOMMetadata) -> list:
         """Get subjects."""
-        return ""
+        return [get_text(subject) for subject in lom["general.keyword"]]
 
-    def get_description(self, obj: dict) -> str:
+    def get_descriptions(self, lom: LOMMetadata) -> list:
         """Get descriptions."""
-        print(f"LOMRecordSchema.get_description obj: {obj['general']}")
-        # return obj["metadata"]["general"]["description"]["langstring"]["#text"]
-        return ""
+        return [get_text(desc) for desc in lom["general.description"]]
 
-    def get_publisher(self, obj: dict) -> str:
+    def get_publishers(self, lom: LOMMetadata) -> list:
         """Get publishers."""
-        return ""
+        publishers = []
+        for contribute in lom["lifecycle.contribute"]:
+            publishers += contribute["entity"]
+        return publishers
 
-    def get_type(self, obj: dict) -> str:
+    def get_types(self, lom: LOMMetadata) -> list:
         """Get types."""
-        return ""
+        entry = lom["educational.learningresourcetype.entry"]
+        if entry:
+            return [get_text(entry)]
+        return []
 
-    def get_source(self, obj: dict) -> str:
+    def get_sources(self, lom: LOMMetadata) -> list:
         """Get soruces."""
-        return ""
+        return []
 
-    def get_language(self, obj: dict) -> str:
+    def get_languages(self, lom: LOMMetadata) -> list:
         """Get languages."""
-        return ""
+        languages = lom["general.language"]
+        if languages and len(languages) > 0:
+            return languages
+        return []
 
-    def get_location(self, obj: dict) -> str:
+    def get_locations(self, lom: LOMMetadata) -> list:
         """Get locations."""
-        return ""
+        return []
 
-    def get_format(self, obj: dict) -> str:
+    def get_formats(self, lom: LOMMetadata) -> list:
         """Get formats."""
-        return ""
+        formats = lom["technical.format"]
+        if formats and len(formats) > 0:
+            return formats
+        return []

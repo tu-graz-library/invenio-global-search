@@ -66,7 +66,7 @@ class LOMRecordSchema(BaseSerializerSchema):
         relations = []
         for relation in lom["relation"]:
             if "resource" in relation and "description" in relation["resource"]:
-                relations += get_text(relation["resource"]["description"][0])
+                relations += [get_text(relation["resource"]["description"][0])]
         return relations
 
     def get_rights(self, lom: LOMMetadata) -> list:
@@ -78,7 +78,7 @@ class LOMRecordSchema(BaseSerializerSchema):
         dates = []
         for contribute in lom["lifecycle.contribute"]:
             if "date" in contribute and "datetime" in contribute["date"]:
-                dates += contribute["date"]["datetime"]
+                dates += [contribute["date"]["datetime"]]
         return dates
 
     def get_subjects(self, lom: LOMMetadata) -> list:

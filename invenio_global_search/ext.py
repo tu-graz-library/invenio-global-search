@@ -29,3 +29,5 @@ class InvenioGlobalSearch:
         for k in dir(config):
             if k.startswith("GLOBAL_SEARCH_"):
                 app.config.setdefault(k, getattr(config, k))
+            elif k.startswith("DUBLIN_CORE_"):
+                app.config.setdefault(k, getattr(config, k))

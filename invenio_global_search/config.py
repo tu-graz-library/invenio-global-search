@@ -9,7 +9,9 @@
 
 from invenio_i18n import gettext as _
 
-DUBLIN_CORE_ORIGINAL_SCHEMAS = {
+from .cli import rebuild_database_lom, rebuild_database_marc21, rebuild_database_rdm
+
+GLOBAL_SEARCH_ORIGINAL_SCHEMAS = {
     "lom": {
         "schema": "lom",
         "name_l10n": _("OER"),
@@ -23,3 +25,9 @@ DUBLIN_CORE_ORIGINAL_SCHEMAS = {
         "name_l10n": _("Publication"),
     },
 }
+
+GLOBAL_SEARCH_REBUILD_DATABASE = [
+    # rebuild_database_rdm,
+    rebuild_database_marc21,
+    # rebuild_database_lom,
+]

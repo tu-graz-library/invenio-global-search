@@ -7,8 +7,6 @@
 
 """CLI."""
 
-from click import group
-from flask.cli import with_appcontext
 from invenio_access.permissions import system_identity
 from invenio_rdm_records.records.api import RDMRecord
 from invenio_rdm_records.resources.serializers.dublincore import (
@@ -63,17 +61,3 @@ def rebuild_database_lom() -> None:
             schema="lom",
             identity=system_identity,
         )
-
-
-@group()
-def global_search() -> None:
-    """CLI-Group for invenio global search commands."""
-
-
-@global_search.command()
-@with_appcontext
-def rebuild_database() -> None:
-    """Rebuild all records in database."""
-    rebuild_database_marc21()
-    rebuild_database_lom()
-    rebuild_database_rdm()

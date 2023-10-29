@@ -64,6 +64,9 @@ class LOMRecordSchema(BaseSerializerSchema):
     def get_relations(self, lom: LOMMetadata) -> list:
         """Get relations."""
         relations = []
+        if "relations" not in lom:
+            return []
+
         for relation in lom["relation"]:
             if "resource" in relation and "description" in relation["resource"]:
                 relations += [get_text(relation["resource"]["description"][0])]
@@ -83,14 +86,21 @@ class LOMRecordSchema(BaseSerializerSchema):
 
     def get_subjects(self, lom: LOMMetadata) -> list:
         """Get subjects."""
+        if "keyword" not in lom["general"]:
+            return []
         return [get_text(subject) for subject in lom["general.keyword"]]
 
     def get_descriptions(self, lom: LOMMetadata) -> list:
         """Get descriptions."""
+        if "description" not in lom["general"]:
+            return []
         return [get_text(desc) for desc in lom["general.description"]]
 
     def get_publishers(self, lom: LOMMetadata) -> list:
         """Get publishers."""
+        if "contribute" not in lom["lifecycle"]:
+            return []
+
         publishers = []
         for contribute in lom["lifecycle.contribute"]:
             publishers += contribute["entity"]
@@ -98,10 +108,11 @@ class LOMRecordSchema(BaseSerializerSchema):
 
     def get_types(self, lom: LOMMetadata) -> list:
         """Get types."""
-        entry = lom["educational.learningresourcetype.entry"]
-        if entry:
+        try:
+            entry = lom["educational.learningresourcetype.entry"]
             return [get_text(entry)]
-        return []
+        except KeyError:
+            return []
 
     def get_sources(self, lom: LOMMetadata) -> list:
         """Get soruces."""
@@ -109,10 +120,12 @@ class LOMRecordSchema(BaseSerializerSchema):
 
     def get_languages(self, lom: LOMMetadata) -> list:
         """Get languages."""
-        languages = lom["general.language"]
-        if languages and len(languages) > 0:
-            return languages
-        return []
+        try:
+            languages = lom["general.language"]
+            if len(languages) > 0:
+                return languages
+        except KeyError:
+            return []
 
     def get_locations(self, lom: LOMMetadata) -> list:
         """Get locations."""
@@ -120,7 +133,9 @@ class LOMRecordSchema(BaseSerializerSchema):
 
     def get_formats(self, lom: LOMMetadata) -> list:
         """Get formats."""
-        formats = lom["technical.format"]
-        if formats and len(formats) > 0:
-            return formats
-        return []
+        try:
+            formats = lom["technical.format"]
+            if len(formats) > 0:
+                return formats
+        except KeyError:
+            return []

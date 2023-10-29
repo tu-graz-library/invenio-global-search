@@ -10,7 +10,7 @@
 from flask import current_app
 from werkzeug.local import LocalProxy
 
-current_records_dublin_core = LocalProxy(
+current_global_search = LocalProxy(
     lambda: current_app.extensions["invenio-global-search"],
 )
-"""Helper proxy to get the dublin core extension."""
+"""Helper proxy to get the global search extension."""

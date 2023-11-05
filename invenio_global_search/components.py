@@ -17,12 +17,14 @@ from invenio_rdm_records.resources.serializers.dublincore import (
     DublinCoreJSONSerializer,
 )
 from invenio_records_global_search import current_records_global_search
+from invenio_records_lom.records import LOMRecord
+from invenio_records_lom.utils import LOMMetadata
+from invenio_records_marc21.records import Marc21Record
 from invenio_records_marc21.services.record import Marc21Metadata
 from invenio_records_resources.services.records.components import ServiceComponent
 from invenio_records_resources.services.uow import Operation
 
 from .serializers import LOMRecordJSONSerializer, Marc21RecordJSONSerializer
-from .utils import LOMMetadata
 
 
 def map_metadata_from_a_to_b(
@@ -99,7 +101,7 @@ class Marc21ToDublinCoreComponent(ServiceComponent):
         self,
         identity: Identity,
         data: dict | None = None,  # noqa: ARG002
-        record: RDMRecord | None = None,
+        record: Marc21Record | None = None,
         **_: dict,
     ) -> None:
         """Create handler."""
@@ -120,7 +122,7 @@ class LOMToDublinCoreComponent(ServiceComponent):
         self,
         identity: Identity,
         data: dict | None = None,  # noqa: ARG002
-        record: RDMRecord | None = None,
+        record: LOMRecord | None = None,
         **_: dict,
     ) -> None:
         """Create handler."""

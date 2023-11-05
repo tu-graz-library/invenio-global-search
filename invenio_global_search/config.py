@@ -27,7 +27,7 @@ GLOBAL_SEARCH_ORIGINAL_SCHEMAS = {
 }
 
 GLOBAL_SEARCH_REBUILD_DATABASE = [
-    # rebuild_database_rdm,
-    rebuild_database_marc21,
+    rebuild_database_rdm,
+    # rebuild_database_marc21,
     # rebuild_database_lom,
 ]

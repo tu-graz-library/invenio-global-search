@@ -38,7 +38,7 @@ def map_metadata_from_a_to_b(
     schema_mapping = {
         "rdm": "records",
         "lom": "oer",
-        "marc21": "publication",
+        "marc21": "publications",
     }
 
     record_serializer = serializer_cls()

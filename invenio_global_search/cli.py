@@ -23,7 +23,6 @@ from .utils import LOMMetadata
 
 def rebuild_database_rdm() -> None:
     """Rebuild index rdm."""
-    print("rebuild_database_rdm")
     records = RDMRecord.model_cls.query.all()
     for rec in records:
         record = RDMRecord(rec.data, model=rec)

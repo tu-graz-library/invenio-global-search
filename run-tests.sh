@@ -55,8 +55,6 @@ fi
 
 export LC_TIME=en_US.UTF-8
 
-python -m setup extract_message --output-file /dev/null
-
 python -m check_manifest
 python -m sphinx.cmd.build -qnNW docs docs/_build/html
 eval "$(docker-services-cli up --db ${DB:-postgresql} --search ${SEARCH:-opensearch} --env)"

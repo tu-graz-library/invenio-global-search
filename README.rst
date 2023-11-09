@@ -6,9 +6,9 @@
     details.
 
 
-==============
+======================
  invenio-global-search
-==============
+======================
 
 .. image:: https://github.com/tu-graz-library/invenio-global-search/workflows/CI/badge.svg
         :target: https://github.com/tu-graz-library/invenio-global-search/actions?query=workflow%3ACI

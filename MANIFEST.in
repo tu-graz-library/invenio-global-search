@@ -11,6 +11,8 @@ include .ruff.toml
 include *.rst
 include *.sh
 include *.txt
+include *.md
+include babel.ini
 prune docs/_build
 recursive-include docs *.bat
 recursive-include docs *.py

@@ -24,7 +24,8 @@ class InvenioGlobalSearch:
         self.init_config(app)
         app.extensions["invenio-global-search"] = self
 
-    def init_config(self, app):
+    @staticmethod
+    def init_config(app):
         """Initialize configuration."""
         for k in dir(config):
             if k.startswith("GLOBAL_SEARCH_"):

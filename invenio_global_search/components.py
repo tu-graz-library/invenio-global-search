@@ -94,8 +94,8 @@ class ComponentOp(Operation):
         )
 
 
-class Marc21ToDublinCoreComponent(ServiceComponent):
-    """Marc21ToDublinCoreComponent."""
+class Marc21ToGlobalSearchComponent(ServiceComponent):
+    """Marc21ToGlobalSearchComponent."""
 
     def publish(
         self,
@@ -115,8 +115,8 @@ class Marc21ToDublinCoreComponent(ServiceComponent):
         self.uow.register(cmp_op)
 
 
-class LOMToDublinCoreComponent(ServiceComponent):
-    """LOMToDublinCoreComponent."""
+class LOMToGlobalSearchComponent(ServiceComponent):
+    """LOMToGlobalSearchComponent."""
 
     def publish(
         self,
@@ -136,8 +136,8 @@ class LOMToDublinCoreComponent(ServiceComponent):
         self.uow.register(cmp_op)
 
 
-class RDMToDublinCoreComponent(ServiceComponent):
-    """RDMToDublinCoreComponent."""
+class RDMToGlobalSearchComponent(ServiceComponent):
+    """RDMToGlobalSearchComponent."""
 
     def publish(
         self,

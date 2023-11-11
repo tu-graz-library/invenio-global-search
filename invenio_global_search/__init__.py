@@ -7,8 +7,19 @@
 
 """Global Search for InvenioRDM."""
 
+from .components import (
+    LOMToGlobalSearchComponent,
+    Marc21ToGlobalSearchComponent,
+    RDMToGlobalSearchComponent,
+)
 from .ext import InvenioGlobalSearch
 
 __version__ = "0.1.0"
 
-__all__ = ("__version__", "InvenioGlobalSearch")
+__all__ = (
+    "__version__",
+    "InvenioGlobalSearch",
+    "LOMToGlobalSearchComponent",
+    "Marc21ToGlobalSearchComponent",
+    "RDMToGlobalSearchComponent",
+)

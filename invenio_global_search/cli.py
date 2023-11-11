@@ -13,12 +13,12 @@ from invenio_rdm_records.resources.serializers.dublincore import (
     DublinCoreJSONSerializer,
 )
 from invenio_records_lom.records.api import LOMRecord
+from invenio_records_lom.utils import LOMMetadata
 from invenio_records_marc21.records.api import Marc21Record
 from invenio_records_marc21.services.record import Marc21Metadata
 
 from .components import map_metadata_from_a_to_b
 from .serializers import LOMRecordJSONSerializer, Marc21RecordJSONSerializer
-from .utils import LOMMetadata
 
 
 def rebuild_database_rdm() -> None:

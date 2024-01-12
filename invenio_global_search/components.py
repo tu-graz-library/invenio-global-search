@@ -43,6 +43,10 @@ def map_metadata_from_a_to_b(
 
     record_serializer = serializer_cls()
     data = record.dumps()
+
+    if data["access"]["record"] != "public":
+        return
+
     obj = metadata_cls(json=data["metadata"]) if metadata_cls else data
     metadata = record_serializer.dump_obj(obj)
     pid = record["id"]
@@ -148,9 +152,6 @@ class RDMToGlobalSearchComponent(ServiceComponent):
         **_: dict,
     ) -> None:
         """Create handler."""
-        if draft["access"]["record"] != "public":
-            return
-
         cmp_op = ComponentOp(
             record,
             serializer_cls=DublinCoreJSONSerializer,

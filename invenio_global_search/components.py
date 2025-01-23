@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2023-2024 Graz University of Technology.
+# Copyright (C) 2023-2025 Graz University of Technology.
 #
 # invenio-global-search is free software; you can redistribute it and/or modify
 # it under the terms of the MIT License; see LICENSE file for more details.
@@ -31,10 +31,10 @@ from .serializers import LOMRecordJSONSerializer, Marc21RecordJSONSerializer
 
 def map_metadata_from_a_to_b(
     record: Record,
-    serializer_cls: MarshmallowSerializer = None,
+    serializer_cls: MarshmallowSerializer,
+    schema: str,
+    identity: Identity,
     metadata_cls: Marc21Metadata | LOMMetadata | None = None,
-    schema: str | None = None,
-    identity: Identity = None,
 ) -> None:
     """Func."""
     schema_mapping = {
@@ -98,9 +98,9 @@ class ComponentOp(Operation):
         self._func(
             self._record,
             self._serializer_cls,
-            self._metadata_cls,
             self._schema,
             self._identity,
+            self._metadata_cls,
         )
 
 
@@ -118,9 +118,9 @@ class Marc21ToGlobalSearchComponent(ServiceComponent):
         cmp_op = ComponentOp(
             record,
             serializer_cls=Marc21RecordJSONSerializer,
-            metadata_cls=Marc21Metadata,
             schema="marc21",
             identity=identity,
+            metadata_cls=Marc21Metadata,
         )
         self.uow.register(cmp_op)
 
@@ -139,9 +139,9 @@ class LOMToGlobalSearchComponent(ServiceComponent):
         cmp_op = ComponentOp(
             record,
             serializer_cls=LOMRecordJSONSerializer,
-            metadata_cls=LOMMetadata,
             schema="lom",
             identity=identity,
+            metadata_cls=LOMMetadata,
         )
         self.uow.register(cmp_op)
 

@@ -8,6 +8,14 @@
 Changes
 =======
 
+Version v0.2.5 (release 2025-01-24)
+
+- setup: only because of dev deps
+- setup: remove restrictions on dependencies
+- setup: update ruff/mypy configuration
+- refactor: remove None defaults
+
+
 Version v0.2.4 (release 2024-06-13)
 
 - fix: catch validation error

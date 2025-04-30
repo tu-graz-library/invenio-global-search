@@ -7,10 +7,14 @@
 
 """Global Search Marc21 schema."""
 
+from ..base import NoOpSchema
 
-from invenio_records_marc21.resources.serializers.dublin_core.schema import (
-    DublinCoreSchema,
-)
+try:
+    from invenio_records_marc21.resources.serializers.dublin_core.schema import (
+        DublinCoreSchema,
+    )
+except ImportError:
+    DublinCoreSchema = NoOpSchema
 
 
 class Marc21RecordSchema(DublinCoreSchema):

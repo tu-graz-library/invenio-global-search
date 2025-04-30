@@ -7,9 +7,14 @@
 
 """Global Search LOM schema."""
 
-from invenio_records_lom.resources.serializers.dublincore.schema import (
-    LOMToDublinCoreRecordSchema,
-)
+from ..base import NoOpSchema
+
+try:
+    from invenio_records_lom.resources.serializers.dublincore.schema import (
+        LOMToDublinCoreRecordSchema,
+    )
+except ImportError:
+    LOMToDublinCoreRecordSchema = NoOpSchema
 
 
 class LOMRecordSchema(LOMToDublinCoreRecordSchema):

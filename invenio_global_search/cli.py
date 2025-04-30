@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2023 Graz University of Technology.
+# Copyright (C) 2023-2025 Graz University of Technology.
 #
 # invenio-global-search is free software; you can redistribute it and/or modify
 # it under the terms of the MIT License; see LICENSE file for more details.
@@ -8,19 +8,40 @@
 """CLI."""
 
 from invenio_access.permissions import system_identity
-from invenio_rdm_records.records.api import RDMRecord
-from invenio_rdm_records.resources.serializers.dublincore import (
-    DublinCoreJSONSerializer,
-)
-from invenio_records_lom.records.api import LOMRecord
-from invenio_records_lom.utils import LOMMetadata
-from invenio_records_marc21.records.api import Marc21Record
-from invenio_records_marc21.services.record import Marc21Metadata
 
 from .components import map_metadata_from_a_to_b
-from .serializers import LOMRecordJSONSerializer, Marc21RecordJSONSerializer
+from .serializers import (
+    LOMRecordJSONSerializer,
+    Marc21RecordJSONSerializer,
+    RDMRecordJSONSerializer,
+)
+from .serializers.base import require_package
+
+try:
+    from invenio_rdm_records.records.api import RDMRecord
+    from invenio_rdm_records.resources.serializers.dublincore import (
+        DublinCoreJSONSerializer,
+    )
+except ImportError:
+    RDMRecord = type("RDMRecord")
+    DublinCoreJSONSerializer = type("DublinCoreJSONSerializer")
+
+try:
+    from invenio_records_lom.records.api import LOMRecord
+    from invenio_records_lom.utils import LOMMetadata
+except ImportError:
+    LOMRecord = type("LOMRecord")
+    LOMMetadata = type("LOMMetadata")
+
+try:
+    from invenio_records_marc21.records.api import Marc21Record
+    from invenio_records_marc21.services.record import Marc21Metadata
+except ImportError:
+    Marc21Record = type("Marc21Record")
+    Marc21Metadata = type("Marc21Metadata")
 
 
+@require_package(RDMRecordJSONSerializer)
 def rebuild_database_rdm() -> None:
     """Rebuild index rdm."""
     records = RDMRecord.model_cls.query.all()
@@ -34,6 +55,7 @@ def rebuild_database_rdm() -> None:
         )
 
 
+@require_package(Marc21RecordJSONSerializer)
 def rebuild_database_marc21() -> None:
     """Rebuild index marc21."""
     records = Marc21Record.model_cls.query.all()
@@ -48,6 +70,7 @@ def rebuild_database_marc21() -> None:
         )
 
 
+@require_package(LOMRecordJSONSerializer)
 def rebuild_database_lom() -> None:
     """Rebuild index lom."""
     records = LOMRecord.model_cls.query.all()

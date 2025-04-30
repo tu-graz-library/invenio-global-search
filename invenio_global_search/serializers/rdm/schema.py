@@ -6,8 +6,14 @@
 # it under the terms of the MIT License; see LICENSE file for more details.
 
 """Global Search rdm schema."""
+from invenio_global_search.serializers.base import NoOpSchema
 
-from invenio_rdm_records.resources.serializers.dublincore.schema import DublinCoreSchema
+try:
+    from invenio_rdm_records.resources.serializers.dublincore.schema import (
+        DublinCoreSchema,
+    )
+except ImportError:
+    DublinCoreSchema = NoOpSchema
 
 
 class RDMRecordSchema(DublinCoreSchema):

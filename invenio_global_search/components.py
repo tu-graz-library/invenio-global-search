@@ -11,30 +11,51 @@ from collections.abc import Callable
 
 from flask import current_app
 from flask_principal import Identity
-from flask_resources import MarshmallowSerializer
-from invenio_rdm_records.records.api import RDMDraft, RDMRecord
-from invenio_rdm_records.resources.serializers.dublincore import (
-    DublinCoreJSONSerializer,
-)
+
+try:
+    from invenio_rdm_records.records.api import RDMDraft, RDMRecord
+except ImportError:
+    RDMRecord = type("RDMRecord")
+    DublinCoreJSONSerializer = type("DublinCoreJSONSerializer")
+
+
 from invenio_records.api import Record
 from invenio_records_global_search import current_records_global_search
-from invenio_records_lom.records import LOMRecord
-from invenio_records_lom.utils import LOMMetadata
-from invenio_records_marc21.records import Marc21Record
-from invenio_records_marc21.services.record import Marc21Metadata
+
+try:
+    from invenio_records_lom.records import LOMRecord
+    from invenio_records_lom.utils import LOMMetadata
+except ImportError:
+    LOMRecord = type("LOMRecord")
+    LOMMetadata = type("LOMMetadata")
+
+
+try:
+    from invenio_records_marc21.records import Marc21Record
+    from invenio_records_marc21.services.record import Marc21Metadata
+except ImportError:
+    Marc21Record = type("Marc21Record")
+    Marc21Metadata = type("Marc21Metadata")
+
+
 from invenio_records_resources.services.records.components import ServiceComponent
 from invenio_records_resources.services.uow import Operation, UnitOfWork
 from marshmallow.exceptions import ValidationError
 
-from .serializers import LOMRecordJSONSerializer, Marc21RecordJSONSerializer
+from .serializers import (
+    BaseGlobalSearchSerializer,
+    LOMRecordJSONSerializer,
+    Marc21RecordJSONSerializer,
+    RDMRecordJSONSerializer,
+)
 
 
 def map_metadata_from_a_to_b(
     record: Record,
-    serializer_cls: MarshmallowSerializer,
+    serializer_cls: type[BaseGlobalSearchSerializer],
     schema: str,
     identity: Identity,
-    metadata_cls: Marc21Metadata | LOMMetadata | None = None,
+    metadata_cls: type[Marc21Metadata] | type[LOMMetadata] | None = None,
 ) -> None:
     """Func."""
     schema_mapping = {
@@ -44,6 +65,7 @@ def map_metadata_from_a_to_b(
     }
 
     record_serializer = serializer_cls()
+
     data = record.dumps()
 
     if data["access"]["record"] != "public":
@@ -80,8 +102,8 @@ class ComponentOp(Operation):
         self,
         record: Record,
         func: Callable = map_metadata_from_a_to_b,
-        serializer_cls: MarshmallowSerializer = None,
-        metadata_cls: Marc21Metadata | LOMMetadata | None = None,
+        serializer_cls: type[BaseGlobalSearchSerializer] | None = None,
+        metadata_cls: type[Marc21Metadata] | type[LOMMetadata] | None = None,
         schema: str | None = None,
         identity: Identity = None,
     ) -> None:
@@ -160,7 +182,7 @@ class RDMToGlobalSearchComponent(ServiceComponent):
         """Create handler."""
         cmp_op = ComponentOp(
             record,
-            serializer_cls=DublinCoreJSONSerializer,
+            serializer_cls=RDMRecordJSONSerializer,
             schema="rdm",
             identity=identity,
         )

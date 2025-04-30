@@ -7,11 +7,13 @@
 
 """Serializers."""
 
+from .base import BaseGlobalSearchSerializer
 from .lom import LOMRecordJSONSerializer
 from .marc21 import Marc21RecordJSONSerializer
 from .rdm import RDMRecordJSONSerializer
 
 __all__ = (
+    "BaseGlobalSearchSerializer",
     "RDMRecordJSONSerializer",
     "Marc21RecordJSONSerializer",
     "LOMRecordJSONSerializer",

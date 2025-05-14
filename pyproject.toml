@@ -27,3 +27,11 @@ ignore = [
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.ty.src]
+root = "invenio_global_search"
+
+[tool.ty.rules]
+unresolved-import = "ignore"
+invalid-argument-type = "ignore" # false errors, inheritance not working yet
+unused-ignore-comment = "error"

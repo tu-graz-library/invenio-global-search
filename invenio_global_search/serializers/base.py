@@ -8,7 +8,7 @@
 """Global Search wrappers and stubs."""
 
 from functools import wraps
-from typing import Any, Callable
+from typing import Callable
 from warnings import warn
 
 from flask_resources import MarshmallowSerializer
@@ -20,7 +20,7 @@ class BaseGlobalSearchSerializer(MarshmallowSerializer):
     Used for correctly handling missing imports.
     """
 
-    def __init__(self, no_op=False, **kwargs: Any) -> None:
+    def __init__(self, *, no_op: bool = False, **kwargs: dict) -> None:
         """Construct."""
         self._no_op = no_op
         super().__init__(**kwargs)
@@ -34,7 +34,7 @@ class BaseGlobalSearchSerializer(MarshmallowSerializer):
 class NoOpSchema:
     """Stub schema for dealing with missing imports."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self) -> None:
         """Construct."""
 
 
@@ -45,14 +45,12 @@ def require_package[T](serializer_cls: type[BaseGlobalSearchSerializer]) -> Call
         """Decorate."""
 
         @wraps(func)
-        def wrapper(*args, **kwargs) -> T | None:
+        def wrapper() -> T | None:
             if serializer_cls().no_op:
-                warn(
-                    f"the global search serializers are misconfigured, the package for the serializer: {serializer_cls} hasn't been installed",
-                    stacklevel=2,
-                )
+                msg = f"the global search serializers are misconfigured, the package for the serializer: {serializer_cls} hasn't been installed"
+                warn(msg, stacklevel=2)
                 return None
-            return func(*args, **kwargs)
+            return func()
 
         return wrapper
 

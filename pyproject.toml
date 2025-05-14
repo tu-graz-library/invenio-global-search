@@ -16,6 +16,7 @@ exclude = ["docs"]
 select = ["ALL"]
 ignore = [
   "D203", "D211", "D212", "D213",
+  "E501",
   "FA102",
   "PLR0913",
   "RUF022",

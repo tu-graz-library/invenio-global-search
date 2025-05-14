@@ -19,4 +19,5 @@ jobs:
   tests:
     uses: inveniosoftware/workflows/.github/workflows/tests-python.yml@master
     with:
+      python-version: '["3.12"]'
       extras: "rdm,lom,marc21,tests"

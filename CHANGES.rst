@@ -8,6 +8,15 @@
 Changes
 =======
 
+Version v0.3.0 (release 2025-05-15)
+
+- refactor: heavy refactoring
+- tests: just python 3.12
+- chore: multiple small changes
+- docs: update README
+- dependencies: handle libraries just if installed
+
+
 Version v0.2.5 (release 2025-01-24)
 
 - setup: only because of dev deps

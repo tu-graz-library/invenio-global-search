@@ -34,6 +34,19 @@ try:
     from invenio_records_lom.resources.serializers.dublincore.schema import (
         LOMToDublinCoreRecordSchema,
     )
+    from invenio_records_lom.utils import LOMMetadata
+
+    class GlobalSearchLOMToDublinCoreRecordSchema(LOMToDublinCoreRecordSchema):
+        """Override methods from invenio_records_lom LOMToDublinCoreRecordSchema."""
+
+        def get_rights(self, lom: LOMMetadata) -> list:
+            """Get rights.
+
+            Method was overriden to take just the name of the right, no need for
+            link in global-search context.
+            """
+            params = ["name"]
+            return lom.get_rights(params=params)
 
     class LOMRecordJSONSerializer(MarshmallowSerializer):
         """Marshmallow based DataCite serializer for records."""
@@ -42,7 +55,7 @@ try:
             """Construct."""
             super().__init__(
                 format_serializer_cls=JSONSerializer,
-                object_schema_cls=LOMToDublinCoreRecordSchema,
+                object_schema_cls=GlobalSearchLOMToDublinCoreRecordSchema,
                 list_schema_cls=BaseListSchema,
             )
 

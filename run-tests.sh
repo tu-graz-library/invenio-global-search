@@ -55,6 +55,7 @@ fi
 
 export LC_TIME=en_US.UTF-8
 
+ruff check .
 ty check .
 
 python -m check_manifest

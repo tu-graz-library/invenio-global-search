@@ -7,7 +7,6 @@
 
 """Global Search for InvenioRDM."""
 
-
 from flask import Flask
 
 from . import config

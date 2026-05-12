@@ -22,7 +22,7 @@ ignore = [
   "RUF022",
   "TC001", "TC002", "TC003",
   "TID252",
-  "UP009",
+  "UP009", "PLC0415"
 ]
 
 [tool.mypy]

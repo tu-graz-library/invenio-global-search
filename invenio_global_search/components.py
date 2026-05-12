@@ -147,7 +147,11 @@ def map_metadata_from_a_to_b(
     if data["access"]["record"] != "public":
         return
 
-    obj = metadata_cls(json=data["metadata"]) if metadata_cls else data
+    obj = (
+        metadata_cls(json=data["metadata"])  # ty: ignore[unknown-argument]
+        if metadata_cls
+        else data
+    )
     metadata = record_serializer.dump_obj(obj)
     pid = record["id"]
     path = schema_mapping[schema]
@@ -191,7 +195,10 @@ class ComponentOp(Operation):
         self._schema = schema
         self._identity = identity
 
-    def on_post_commit(self, _: UnitOfWork) -> None:
+    def on_post_commit(  # ty: ignore[invalid-method-override]
+        self,
+        _: UnitOfWork,
+    ) -> None:
         """Post commit."""
         self._func(
             self._record,

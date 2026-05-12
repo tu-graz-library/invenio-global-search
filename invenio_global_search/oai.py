@@ -47,7 +47,7 @@ from typing import Final
 
 from flask import current_app
 from invenio_db import db
-from invenio_pidstore.errors import PersistentIdentifierError
+from invenio_pidstore.errors import PersistentIdentifierError, PIDDoesNotExistError
 from invenio_pidstore.fetchers import FetchedPID
 from invenio_pidstore.models import PersistentIdentifier
 
@@ -172,6 +172,9 @@ def get_oai_dc_etree_fromdatamodel(record: dict) -> dict:
         .filter_by(pid_value=record["_source"]["id"], object_type="rec")
         .first()
     )
+    if not pid:
+        raise PIDDoesNotExistError
+
     if pid.pid_type == "lomid":
         try:
             return lom_dc_etree(pid, record)
@@ -187,7 +190,7 @@ def get_oai_dc_etree_fromdatamodel(record: dict) -> dict:
             return dublincore_etree(pid, record)
         except NameError:
             raise RuntimeError(_generic_name_err_msg.format(_rdm_str)) from None
-    
+
     msg = f"Record of type {pid.pid_type} unknown to global-search usecase."
     raise RuntimeError(msg)
 
@@ -195,7 +198,7 @@ def get_oai_dc_etree_fromdatamodel(record: dict) -> dict:
 def gs_oai_dc_etree(
     pid: str,
     record: dict,
-) -> dict:
+) -> dict | None:
     """GS-to-OAI_DC adapter for oai_dc metadata format.
 
     From the fetched global-search record, search the original record

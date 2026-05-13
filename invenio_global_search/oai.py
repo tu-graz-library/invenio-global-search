@@ -36,6 +36,7 @@ OAISERVER_METADATA_FORMATS = {
 }
 
 OAISERVER_GETRECORD_FETCHER = "invenio_global_search.oai:getrecord_fetcher"
+OAISERVER_RECORD_SETS_FETCHER = "invenio_global_search.oai:getrecord_sets_fetcher"
 OAISERVER_RECORD_INDEX='global-search-records-record-v1.0.0'
 OAISERVER_ID_FETCHER="invenio_global_search.oai:oaiid_fetcher"
 
@@ -50,6 +51,7 @@ from invenio_db import db
 from invenio_pidstore.errors import PersistentIdentifierError, PIDDoesNotExistError
 from invenio_pidstore.fetchers import FetchedPID
 from invenio_pidstore.models import PersistentIdentifier
+from invenio_records_resources.services.records.results import RecordItem
 
 try:
     from invenio_rdm_records.oai import dublincore_etree
@@ -288,6 +290,14 @@ def oaiid_fetcher(record_uuid: str, data: dict) -> FetchedPID:  # noqa: ARG001
             pid_type="oai",
             pid_value=oai_pid,
         )
+
+
+def getrecord_sets_fetcher(_: RecordItem) -> list:
+    """Fetch sets of the record.
+
+    TODO: Not implemented yet.
+    """
+    return []
 
 
 class OAIGlobalSearch(RecordsSearch):

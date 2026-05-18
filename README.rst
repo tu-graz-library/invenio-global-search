@@ -30,7 +30,7 @@ Tests
 
 .. code-block:: console
 
-    pipenv run ./run-tests.sh
+    uv run ./run-tests.sh
 
 
 Installation
@@ -38,7 +38,7 @@ Installation
 
 This basic installation of this package::
 
-    pip install invenio-global-search
+    uv pip install invenio-global-search
 
 will not give access to any of its features. It is intended to be extended
 with the packages needed in a specific Invenio instance.
@@ -53,13 +53,13 @@ To install any of them or all:
 
 - ::
 
-      pip install invenio-global-search[rdm]
+      uv pip install invenio-global-search[rdm]
 
   This enables the ``rdm-records`` features.
 
 - ::
 
-      pip install invenio-global-search[rdm, marc21, lom]
+      uv pip install invenio-global-search[rdm, marc21, lom]
 
   This enables all the features of the package.
 

@@ -175,7 +175,7 @@ ListRecords & GetRecord features
 
 An InvenioRDM repository can be harvested via the Open Archives Initiative Protocol for Metadata Harvesting (OAI-PMH). OAI-PMH is a widely used protocol for harvesting metadata and most popular repository software provide support for this protocol.
 
-Because Global search needs to support multiple data models, the default OAISERVER_ features had to be overridden with custom function and classes that are based mostly on `global-search` index. This works also because global-search keeps track only of open-access records.
+Because Global search needs to support multiple data models, the default `OAISERVER_` features had to be overridden with custom function and classes that are based mostly on `global-search` index. This works also because global-search keeps track only of open-access records.
 
 Currently supported custom OAI Features:
   - ListRecords and GetRecord for

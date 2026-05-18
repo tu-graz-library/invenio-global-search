@@ -21,7 +21,7 @@ Version v0.4.0 (released 2026-05-18)
 - tests: py 3.14
 - tests: add ruff check
 - fix: type errors
-- feat(oai): add necessary functions for OAISERVER_ overrides
+- feat(oai): add necessary functions for `OAISERVER_` overrides
 
 Version v0.3.0 (release 2025-05-15)
 

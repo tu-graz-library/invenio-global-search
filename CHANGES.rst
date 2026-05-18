@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version v0.4.2 (released 2026-05-18)
+
+- fix: code block for changes.rst
+
 Version v0.4.1 (released 2026-05-18)
 
 - fix(docs): include word containing '_' in code block

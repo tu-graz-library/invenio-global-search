@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2023 Graz University of Technology.
+# Copyright (C) 2023-2026 Graz University of Technology.
 #
 # invenio-global-search is free software; you can redistribute it and/or modify
 # it under the terms of the MIT License; see LICENSE file for more details.
@@ -14,7 +14,7 @@ from .components import (
 )
 from .ext import InvenioGlobalSearch
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 __all__ = (
     "__version__",

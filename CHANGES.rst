@@ -1,5 +1,5 @@
 ..
-    Copyright (C) 2023 Graz University of Technology.
+    Copyright (C) 2023-2026 Graz University of Technology.
 
     invenio-global-search is free software; you can redistribute it and/or
     modify it under the terms of the MIT License; see LICENSE file for more
@@ -7,6 +7,17 @@
 
 Changes
 =======
+
+Version v0.4.0 (released 2026-05-18)
+
+- chore(docs): move to uv
+- fix(docs): keep only README.rst
+- chore(oai): add OAI docs
+- feat(oai): move not implemented sets fetcher to GS
+- tests: py 3.14
+- tests: add ruff check
+- fix: type errors
+- feat(oai): add necessary functions for OAISERVER_ overrides
 
 Version v0.3.0 (release 2025-05-15)
 

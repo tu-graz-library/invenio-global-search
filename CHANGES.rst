@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version v0.4.1 (released 2026-05-18)
+
+- fix(docs): include word containing '_' in code block
+
 Version v0.4.0 (released 2026-05-18)
 
 - chore(docs): move to uv

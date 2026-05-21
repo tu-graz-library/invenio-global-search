@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version v0.4.3 (released 2026-05-21)
+
+- fix(oai): lom allows per defintion only lom
+
 Version v0.4.2 (released 2026-05-18)
 
 - fix: code block for changes.rst

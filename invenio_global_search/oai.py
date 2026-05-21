@@ -52,6 +52,7 @@ from invenio_pidstore.errors import PersistentIdentifierError, PIDDoesNotExistEr
 from invenio_pidstore.fetchers import FetchedPID
 from invenio_pidstore.models import PersistentIdentifier
 from invenio_records_resources.services.records.results import RecordItem
+from lxml.etree import Element
 
 try:
     from invenio_rdm_records.oai import dublincore_etree
@@ -125,18 +126,22 @@ def gs_lom_etree(
     """GS-to-LOM adapter for lom metadata format."""
     try:
         if "original" not in record["_source"]:
-            return lom_etree(pid, record)
+            return Element("not-lom")
 
         original = record["_source"]["original"]
-        pid_value = original["pid"]
+
+        if original["schema"] != "lom":
+            return Element("not-lom")
+
         lom_record_idx_view = current_search_client.search(
             index=f"{LOMRecord.index._name}",  # noqa: SLF001
-            body={"query": {"term": {"id": pid_value}}},
+            body={"query": {"term": {"id": original["pid"]}}},
         )
         hits = lom_record_idx_view["hits"]["hits"]
         if len(hits) > 0:
             return lom_etree(pid, hits[0])
-        return lom_etree(pid, record)
+
+        return Element("not-lom")
     except NameError:
         raise RuntimeError(_generic_name_err_msg.format(_lom_str)) from None
 

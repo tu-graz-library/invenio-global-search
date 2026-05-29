@@ -9,7 +9,14 @@
 
 from invenio_i18n import gettext as _
 
-from .cli import rebuild_database_lom, rebuild_database_marc21, rebuild_database_rdm
+from .cli import (
+    rebuild_database_lom,
+    rebuild_database_marc21,
+    rebuild_database_rdm,
+    update_missing_lom_records,
+    update_missing_marc21_records,
+    update_missing_rdm_records,
+)
 
 GLOBAL_SEARCH_ORIGINAL_SCHEMAS = {
     "lom": {
@@ -36,7 +43,18 @@ GLOBAL_SEARCH_REBUILD_DATABASE = [
     rebuild_database_marc21,
     rebuild_database_lom,
 ]
-"""This configuration variable is to configure the cli functions.
+"""This configuration variable is to configure the rebuild-database cli functions.
+
+Setting up the configuration like that is only for convenience. Instances which
+are not using all three packages should set this variable in invenio.cfg
+"""
+
+GLOBAL_SEARCH_UPDATE_MISSING = [
+    update_missing_rdm_records,
+    update_missing_marc21_records,
+    update_missing_lom_records,
+]
+"""This configuration variable is to configure the update missing records cli functions.
 
 Setting up the configuration like that is only for convenience. Instances which
 are not using all three packages should set this variable in invenio.cfg

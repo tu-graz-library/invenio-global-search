@@ -8,6 +8,10 @@
 Changes
 =======
 
+Version v0.5.0 (released 2026-06-12)
+
+- feat(cli): option to create/update only missing records
+
 Version v0.4.3 (released 2026-05-21)
 
 - fix(oai): lom allows per defintion only lom

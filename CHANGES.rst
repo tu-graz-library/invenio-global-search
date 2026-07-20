@@ -8,6 +8,11 @@
 Changes
 =======
 
+Version v0.5.1 (released 2026-07-20)
+
+- fix: ty warning
+- fix(cli): read record before attempting global-search create
+
 Version v0.5.0 (released 2026-06-12)
 
 - feat(cli): option to create/update only missing records

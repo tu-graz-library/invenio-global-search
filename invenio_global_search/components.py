@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2023-2025 Graz University of Technology.
+# Copyright (C) 2023-2026 Graz University of Technology.
 #
 # invenio-global-search is free software; you can redistribute it and/or modify
 # it under the terms of the MIT License; see LICENSE file for more details.
@@ -178,7 +178,7 @@ def map_metadata_from_a_to_b(
 class ComponentOp(Operation):
     """ComponentOp."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0917
         self,
         record: Record,
         serializer_cls: GlobalSearchSerializerType,

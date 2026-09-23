@@ -147,6 +147,7 @@ def map_metadata_from_a_to_b(
     if data["access"]["record"] != "public":
         return
 
+    original_created_date = data["created"]
     obj = (
         metadata_cls(json=data["metadata"])  # ty: ignore[unknown-argument]
         if metadata_cls
@@ -159,6 +160,7 @@ def map_metadata_from_a_to_b(
         "view": f"{path}/{pid}",
         "schema": schema,
         "pid": pid,
+        "created": original_created_date,
     }
     data = {
         "metadata": metadata,

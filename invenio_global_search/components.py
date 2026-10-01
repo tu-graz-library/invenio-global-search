@@ -153,8 +153,14 @@ def map_metadata_from_a_to_b(
         if metadata_cls
         else data
     )
-    metadata = record_serializer.dump_obj(obj)
     pid = record["id"]
+    try:
+        metadata = record_serializer.dump_obj(obj)
+    except Exception:
+        msg = "Record pid: %s with schema %s has a serialization error."
+        current_app.logger.exception(msg, pid, schema)
+        return
+
     path = schema_mapping[schema]
     original = {
         "view": f"{path}/{pid}",

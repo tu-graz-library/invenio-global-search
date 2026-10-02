@@ -8,6 +8,12 @@
 Changes
 =======
 
+Version v0.6.0 (released 2026-10-02)
+
+- fix: catch serialization exception
+- fix: add created date to original
+- chore(linter): apply new ruff
+
 Version v0.5.1 (released 2026-07-20)
 
 - fix: ty warning

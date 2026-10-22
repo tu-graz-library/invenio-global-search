@@ -161,6 +161,7 @@ def map_metadata_from_a_to_b(
         return
 
     original_created_date = data["created"]
+    original_access_status = data["access"]["status"]
     obj = (
         metadata_cls(json=data["metadata"])  # ty: ignore[unknown-argument]
         if metadata_cls
@@ -182,6 +183,9 @@ def map_metadata_from_a_to_b(
         "schema": schema,
         "pid": pid,
         "created": original_created_date,
+        "access": {
+            "status": original_access_status,
+        },
     }
     data = {
         "metadata": metadata,

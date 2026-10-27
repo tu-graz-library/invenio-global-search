@@ -9,7 +9,7 @@
 
 from invenio_i18n import gettext as _
 
-from .cli import (
+from .tasks import (
     rebuild_database_lom,
     rebuild_database_marc21,
     rebuild_database_rdm,

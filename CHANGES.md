@@ -1,46 +1,46 @@
-..
-    Copyright (C) 2023-2026 Graz University of Technology.
+<!--
+Copyright (C) 2023-2026 Graz University of Technology.
 
-    invenio-global-search is free software; you can redistribute it and/or
-    modify it under the terms of the MIT License; see LICENSE file for more
-    details.
+invenio-global-search is free software; you can redistribute it and/or
+modify it under the terms of the MIT License; see LICENSE file for more
+details.
+-->
 
-Changes
-=======
+# Changes
 
-Version v0.7.0 (released 2026-10-20)
+## Version v0.7.0 (released 2026-10-20)
 
 - chore(type): single ignore rule
 - fix(links): generate link over original links
 
-Version v0.6.0 (released 2026-10-02)
+## Version v0.6.0 (released 2026-10-02)
 
 - fix: catch serialization exception
 - fix: add created date to original
 - chore(linter): apply new ruff
 
-Version v0.5.1 (released 2026-07-20)
+## Version v0.5.1 (released 2026-07-20)
 
 - fix: ty warning
 - fix(cli): read record before attempting global-search create
 
-Version v0.5.0 (released 2026-06-12)
+## Version v0.5.0 (released 2026-06-12)
 
 - feat(cli): option to create/update only missing records
 
-Version v0.4.3 (released 2026-05-21)
+## Version v0.4.3 (released 2026-05-21)
 
 - fix(oai): lom allows per defintion only lom
 
-Version v0.4.2 (released 2026-05-18)
+## Version v0.4.2 (released 2026-05-18)
 
 - fix: code block for changes.rst
 
-Version v0.4.1 (released 2026-05-18)
+## Version v0.4.1 (released 2026-05-18)
 
 - fix(docs): include word containing '_' in code block
 
-Version v0.4.0 (released 2026-05-18)
+## Version v0.4.0 (released 2026-05-18)
 
 - chore(docs): move to uv
 - fix(docs): keep only README.rst
@@ -51,7 +51,7 @@ Version v0.4.0 (released 2026-05-18)
 - fix: type errors
 - feat(oai): add necessary functions for `OAISERVER_` overrides
 
-Version v0.3.0 (release 2025-05-15)
+## Version v0.3.0 (release 2025-05-15)
 
 - refactor: heavy refactoring
 - tests: just python 3.12
@@ -59,45 +59,37 @@ Version v0.3.0 (release 2025-05-15)
 - docs: update README
 - dependencies: handle libraries just if installed
 
-
-Version v0.2.5 (release 2025-01-24)
+## Version v0.2.5 (release 2025-01-24)
 
 - setup: only because of dev deps
 - setup: remove restrictions on dependencies
 - setup: update ruff/mypy configuration
 - refactor: remove None defaults
 
-
-Version v0.2.4 (release 2024-06-13)
+## Version v0.2.4 (release 2024-06-13)
 
 - fix: catch validation error
   this ensures that rebuilding the database does not exit on the first
   error
 - setup: support only python3.12
 
-
-
-Version v0.2.3 (release 2024-02-12)
+## Version v0.2.3 (release 2024-02-12)
 
 - fix: update changed lom api
 
-
-Version v0.2.2 (release 2024-01-12)
+## Version v0.2.2 (release 2024-01-12)
 
 - fix: permission problem
 
-
-Version v0.2.1 (release 2024-01-07)
+## Version v0.2.1 (release 2024-01-07)
 
 - fix: rebuild all databases
 
-
-Version v0.2.0 (release 2023-11-23)
+## Version v0.2.0 (release 2023-11-23)
 
 - global: rename components
 
-
-Version v0.1.0 (release 2023-11-10)
+## Version v0.1.0 (release 2023-11-10)
 
 
 

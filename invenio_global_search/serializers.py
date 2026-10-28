@@ -24,7 +24,7 @@ try:
 
 except ImportError:
 
-    class LOMRecordJSONSerializer(MarshmallowSerializer):
+    class LOMRecordJSONSerializer(MarshmallowSerializer):  # type: ignore[no-redef]
         """Dummy class."""
 
 
@@ -46,7 +46,7 @@ try:
 
 except ImportError:
 
-    class Marc21RecordJSONSerializer(MarshmallowSerializer):
+    class Marc21RecordJSONSerializer(MarshmallowSerializer):  # type: ignore[no-redef]
         """Dummy class."""
 
 
@@ -68,5 +68,5 @@ try:
 
 except ImportError:
 
-    class RDMRecordJSONSerializer(MarshmallowSerializer):
+    class RDMRecordJSONSerializer(MarshmallowSerializer):  # type: ignore[no-redef]
         """Dummy class."""

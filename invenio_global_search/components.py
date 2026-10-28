@@ -4,7 +4,6 @@
 """Components to Hook into other data models."""
 
 from collections.abc import Callable
-from typing import TypeAlias
 
 from flask import current_app
 from flask_principal import Identity
@@ -21,11 +20,9 @@ from .serializers import (
     RDMRecordJSONSerializer,
 )
 
-GlobalSearchSerializerType: TypeAlias = (
-    type[LOMRecordJSONSerializer]
-    | type[Marc21RecordJSONSerializer]
-    | type[RDMRecordJSONSerializer]
-)
+type GlobalSearchSerializerType = type[
+    LOMRecordJSONSerializer | Marc21RecordJSONSerializer | RDMRecordJSONSerializer
+]
 
 
 try:

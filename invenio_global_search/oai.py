@@ -255,6 +255,9 @@ def gs_oai_dc_etree(
             except NameError:
                 raise RuntimeError(_generic_name_err_msg.format(_lom_str)) from None
 
+    msg = f"Record {pid} unknown to global-search usecase."
+    raise RuntimeError(msg)
+
 
 def generate_id(pid_value: str) -> str:
     """Copy-paste the ID generation from https://github.com/inveniosoftware/invenio-rdm-records/blob/master/invenio_rdm_records/services/pids/providers/oai.py.

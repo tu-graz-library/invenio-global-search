@@ -1,13 +1,76 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2023-2025 Graz University of Technology.
+# Copyright (C) 2023-2026 Graz University of Technology.
 #
 # invenio-global-search is free software; you can redistribute it and/or modify
 # it under the terms of the MIT License; see LICENSE file for more details.
 
+[project]
+name = "invenio-global-search"
+description = "InvenioRDM module for a Global Search"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+authors = [{ name = "Graz University of Technology." }]
+keywords = ["invenio", "rdm", "search"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+]
+urls = { Repository = "https://github.com/tu-graz-library/invenio-global-search" }
+dynamic = ["version"]
+
+dependencies = [
+  "invenio-records-global-search>=0.0.1",
+]
+
+[project.entry-points."invenio_base.api_apps"]
+invenio_global_search = "invenio_global_search:InvenioGlobalSearch"
+
+[project.entry-points."invenio_base.apps"]
+invenio_global_search = "invenio_global_search:InvenioGlobalSearch"
+
+[project.optional-dependencies]
+lom = ["invenio-records-lom>=0.12.0"]
+marc21 = ["invenio-records-marc21>=0.17.0"]
+rdm = [
+  "invenio-rdm-records>=18.0.0",
+]
+tests = [
+  "invenio-app>=2.0.0",
+  "invenio-search[opensearch2]>=3.0.0",
+  "pytest-black>=0.6.0",
+  "pytest-invenio>=3.0.0",
+  "ruff>=0.11.9",
+  "ty>=0.0.0a1",
+]
+
 [build-system]
-requires = ["setuptools", "wheel", "babel>2.8"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "invenio_global_search/__init__.py"
+
+[tool.hatch.build]
+exclude = [
+  ".github/**",
+  "tests/**",
+  ".gitignore",
+  "run-tests.sh",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["/invenio_global_search"]
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "--black --isort --cov=invenio_global_search --cov-report=term-missing"
+testpaths = "tests invenio_global_search"
 
 [tool.ruff]
 exclude = ["docs"]
@@ -15,23 +78,26 @@ exclude = ["docs"]
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-  "D203", "D211", "D212", "D213",
+  "D203",
+  "D211",
+  "D212",
+  "D213",
   "E501",
   "FA102",
   "PLR0913",
   "RUF022",
-  "TC001", "TC002", "TC003",
+  "TC001",
+  "TC002",
+  "TC003",
   "TID252",
-  "UP009", "PLC0415"
+  "UP009",
+  "PLC0415",
 ]
-
-[tool.mypy]
-ignore_missing_imports = true
 
 [tool.ty.environment]
 root = ["invenio_global_search"]
 
 [tool.ty.rules]
 unresolved-import = "ignore"
-invalid-argument-type = "ignore" # false errors, inheritance not working yet
+invalid-argument-type = "ignore"  # false errors, inheritance not working yet
 unused-ignore-comment = "error"

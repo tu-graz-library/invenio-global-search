@@ -58,7 +58,6 @@ export LC_TIME=en_US.UTF-8
 ruff check .
 ty check .
 
-python -m check_manifest
 eval "$(docker-services-cli up --db ${DB:-postgresql} --search ${SEARCH:-opensearch} --env)"
 python -m pytest ${pytest_args[@]+"${pytest_args[@]}"}
 

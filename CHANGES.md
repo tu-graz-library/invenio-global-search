@@ -5,6 +5,18 @@ SPDX-License-Identifier: MIT
 
 # Changes
 
+## Version v0.8.0 (released 2026-10-29)
+
+- chore(types): small improvements
+- chore: simplify run-tests
+- chore(license): update license headers to use SPDX
+- chore: move to hatchling
+- chore: migrate to markdown files
+- chore: remove unused files
+- chore: move cli functions to celery tasks
+- refactor: access directly data fields
+- feat: save original access status
+
 ## Version v0.7.0 (released 2026-10-20)
 
 - chore(type): single ignore rule

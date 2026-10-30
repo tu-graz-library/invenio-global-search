@@ -132,6 +132,14 @@ except ImportError:
         """Dummy."""
 
 
+def _get_record_access_status(access_obj: dict) -> str:
+    # records synthesize the access status in a specific field access -> status,
+    # fallback to files access if that field is not present
+    return access_obj.get("status") or (
+        "restricted" if access_obj.get("files") == "restricted" else "open"
+    )
+
+
 def map_metadata_from_a_to_b(
     record: Record,
     serializer_cls: GlobalSearchSerializerType,
@@ -152,6 +160,8 @@ def map_metadata_from_a_to_b(
 
     if data["access"]["record"] != "public":
         return
+
+    original_access_status = _get_record_access_status(data["access"])
 
     obj = (
         metadata_cls(json=data["metadata"])  # ty: ignore[unknown-argument]
@@ -175,7 +185,7 @@ def map_metadata_from_a_to_b(
         "pid": pid,
         "created": data["created"],
         "access": {
-            "status": data["access"]["status"],
+            "status": original_access_status,
         },
     }
     data = {

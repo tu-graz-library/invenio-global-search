@@ -132,6 +132,15 @@ except ImportError:
         """Dummy."""
 
 
+def _get_files_access_status(access_obj: dict) -> str:
+    # rdm-records synthesizes the access status in a specific field,
+    # whereas lom-records and marc21-records might not. In those cases,
+    # we fall back to the files access.
+    return access_obj.get("status") or (
+        "restricted" if access_obj.get("files") == "restricted" else "open"
+    )
+
+
 def map_metadata_from_a_to_b(
     record: Record,
     serializer_cls: GlobalSearchSerializerType,
@@ -152,6 +161,8 @@ def map_metadata_from_a_to_b(
 
     if data["access"]["record"] != "public":
         return
+
+    original_access_status = _get_files_access_status(data["access"])
 
     obj = (
         metadata_cls(json=data["metadata"])  # ty: ignore[unknown-argument]
@@ -175,7 +186,7 @@ def map_metadata_from_a_to_b(
         "pid": pid,
         "created": data["created"],
         "access": {
-            "status": data["access"]["status"],
+            "status": original_access_status,
         },
     }
     data = {

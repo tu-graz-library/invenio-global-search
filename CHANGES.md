@@ -5,6 +5,11 @@ SPDX-License-Identifier: MIT
 
 # Changes
 
+## Version v0.8.1 (released 2026-11-04)
+
+- fix(mapping): set access status based on available fields
+- chore(publish): change to trusted publisher
+
 ## Version v0.8.0 (released 2026-10-29)
 
 - chore(types): small improvements

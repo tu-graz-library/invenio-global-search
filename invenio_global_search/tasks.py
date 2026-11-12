@@ -6,12 +6,17 @@
 from warnings import warn
 
 from celery import shared_task
+from flask import current_app
 from invenio_access.permissions import system_identity
 from invenio_drafts_resources.records import Record
 from invenio_records_global_search.records.api import GlobalSearchRecord
 from invenio_records_resources.services import RecordService
 
-from .components import GlobalSearchSerializerType, map_metadata_from_a_to_b
+from .components import (
+    GlobalSearchSerializerType,
+    map_metadata_from_a_to_b,
+    map_metadata_from_a_to_b_many,
+)
 from .serializers import (
     LOMRecordJSONSerializer,
     Marc21RecordJSONSerializer,
@@ -23,19 +28,21 @@ def _base_rebuild_database_fn(
     record_model_cls: type[Record],
     serializer: GlobalSearchSerializerType,
     schema: str,
-    records_service: RecordService,
     metadata_cls: type | None = None,
 ) -> None:
-    records = record_model_cls.model_cls.query.all()  # ty: ignore[unresolved-attribute]
-    for rec in records:
-        record = record_model_cls(rec.data, model=rec)
-        try:
-            record_item = records_service.read(system_identity, record["id"])
-        except Exception as e:  # noqa: BLE001
-            warn(f"Exception caught for record {record["id"]}: {e}", stacklevel=2)
-            continue
-        map_metadata_from_a_to_b(
-            record_item._record,  # noqa: SLF001
+    batch_size = current_app.config.get("GLOBAL_SEARCH_CLI_BATCH_SIZE", 100)
+    record_ids = [
+        rec_id
+        for (rec_id,) in record_model_cls.model_cls.query.with_entities(
+            record_model_cls.model_cls.id
+        ).all()
+    ]
+
+    for i in range(0, len(record_ids), batch_size):
+        id_batch = record_ids[i : i + batch_size]
+        records = record_model_cls.get_records(id_batch)
+        map_metadata_from_a_to_b_many(
+            records,
             serializer_cls=serializer,
             metadata_cls=metadata_cls,
             schema=schema,
@@ -87,7 +94,6 @@ try:
             RDMRecord,
             RDMRecordJSONSerializer,
             "rdm",
-            current_rdm_records_service,
         )
 
     @shared_task
@@ -127,7 +133,6 @@ try:
             LOMRecord,
             LOMRecordJSONSerializer,
             "lom",
-            current_records_lom.records_service,
             metadata_cls=LOMMetadata,
         )
 
@@ -169,7 +174,6 @@ try:
             Marc21Record,
             Marc21RecordJSONSerializer,
             "marc21",
-            current_records_marc21.records_service,
             metadata_cls=Marc21Metadata,
         )
 

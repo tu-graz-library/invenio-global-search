@@ -146,6 +146,7 @@ def map_metadata_from_a_to_b(
     schema: str,
     identity: Identity,
     metadata_cls: type[Marc21Metadata] | type[LOMMetadata] | None = None,
+    uow: UnitOfWork | None = None,
 ) -> None:
     """Func."""
     schema_mapping = {
@@ -197,10 +198,78 @@ def map_metadata_from_a_to_b(
         current_records_global_search.records_service.create_or_update(
             identity=identity,
             data=data,
+            uow=uow,
         )
     except ValidationError as error:
         msg = "GLOBAL SEARCH pid: %s has following validation error: %s"
         current_app.logger.warning(msg, pid, error)
+
+
+def map_metadata_from_a_to_b_many(
+    records: list[Record],
+    serializer_cls: GlobalSearchSerializerType,
+    schema: str,
+    identity: Identity,
+    metadata_cls: type[Marc21Metadata] | type[LOMMetadata] | None = None,
+    uow: UnitOfWork | None = None,
+) -> None:
+    """Func."""
+    schema_mapping = {
+        "rdm": RDMRecordServiceConfig,
+        "lom": LOMRecordServiceConfig,
+        "marc21": Marc21RecordServiceConfig,
+    }
+
+    record_serializer = serializer_cls()
+
+    gs_data = []
+    for record in records:
+        data = record.dumps()
+
+        if data["access"]["record"] != "public":
+            continue
+
+        original_access_status = _get_record_access_status(data["access"])
+
+        obj = (
+            metadata_cls(json=data["metadata"])  # ty: ignore[unknown-argument]
+            if metadata_cls
+            else data
+        )
+        pid = record["id"]
+        try:
+            metadata = record_serializer.dump_obj(obj)
+        except Exception:
+            msg = "Record pid: %s with schema %s has a serialization error."
+            current_app.logger.exception(msg, pid, schema)
+            continue
+
+        service_config = schema_mapping[schema].build(current_app)
+        link = service_config.links_item["self_html"].expand(record, {})
+
+        original = {
+            "view": link,
+            "schema": schema,
+            "pid": pid,
+            "created": data["created"],
+            "access": {
+                "status": original_access_status,
+            },
+        }
+        data = {
+            "metadata": metadata,
+            "original": original,
+        }
+        gs_data.append(data)
+
+    current_app.logger.info(
+        f"Create or update batch global search records for schema {schema}"
+    )
+    current_records_global_search.records_service.create_or_update_batch(
+        identity=identity,
+        data=gs_data,
+        uow=uow,
+    )
 
 
 class ComponentOp(Operation):

@@ -55,3 +55,9 @@ GLOBAL_SEARCH_UPDATE_MISSING = [
 Setting up the configuration like that is only for convenience. Instances which
 are not using all three packages should set this variable in invenio.cfg
 """
+
+GLOBAL_SEARCH_CLI_BATCH_SIZE = 100
+"""This configuration variable sets the count of records for the rebuild-database cli functions.
+
+Set this to increase or decrease the batch size of records that will be bulk updated.
+"""

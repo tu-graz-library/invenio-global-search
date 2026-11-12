@@ -31,8 +31,10 @@ def _base_rebuild_database_fn(
     batch_size = current_app.config.get("GLOBAL_SEARCH_CLI_BATCH_SIZE", 100)
     record_ids = [
         rec_id
-        for (rec_id,) in record_model_cls.model_cls.query.with_entities(
-            record_model_cls.model_cls.id,
+        for (
+            rec_id,
+        ) in record_model_cls.model_cls.query.with_entities(  # ty: ignore[missing-union-attribute]
+            record_model_cls.model_cls.id,  # ty: ignore[missing-union-attribute]
         ).all()
     ]
 
@@ -64,15 +66,19 @@ def _base_update_missing_fn(
     batch_size = current_app.config.get("GLOBAL_SEARCH_CLI_BATCH_SIZE", 100)
     record_ids = [
         rec_id
-        for (rec_id,) in record_model_cls.model_cls.query.with_entities(
-            record_model_cls.model_cls.id,
+        for (
+            rec_id,
+        ) in record_model_cls.model_cls.query.with_entities(  # ty: ignore[missing-union-attribute]
+            record_model_cls.model_cls.id,  # ty: ignore[missing-union-attribute]
         ).all()
     ]
 
     for i in range(0, len(record_ids), batch_size):
         id_batch = record_ids[i : i + batch_size]
         records = record_model_cls.get_records(id_batch)
-        missing_records = [rec for rec in records if rec.pid.pid_value not in gs_record_ids]
+        missing_records = [
+            rec for rec in records if rec.pid.pid_value not in gs_record_ids
+        ]
         if missing_records:
             map_metadata_from_a_to_b_many(
                 missing_records,
@@ -86,7 +92,6 @@ def _base_update_missing_fn(
 
 
 try:
-    from invenio_rdm_records.proxies import current_rdm_records_service
     from invenio_rdm_records.records.api import RDMRecord
 
     @shared_task
@@ -123,7 +128,6 @@ except ImportError:
 
 
 try:
-    from invenio_records_lom.proxies import current_records_lom
     from invenio_records_lom.records.api import LOMRecord
     from invenio_records_lom.utils import LOMMetadata
 
@@ -163,7 +167,6 @@ except ImportError:
 
 
 try:
-    from invenio_records_marc21.proxies import current_records_marc21
     from invenio_records_marc21.records.api import Marc21Record
     from invenio_records_marc21.services.record import Marc21Metadata
 

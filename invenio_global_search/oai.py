@@ -310,7 +310,7 @@ class OAIGlobalSearch(RecordsSearch):
     Override default_filter to match global-search schema.
     """
 
-    class Meta:  # ty: ignore[invalid-attribute-override]
+    class Meta:  # ty: ignore[incompatible-attribute-override]
         """Configuration for OAI server search."""
 
         default_filter: Final[list] = [

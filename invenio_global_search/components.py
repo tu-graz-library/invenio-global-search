@@ -148,7 +148,7 @@ def _get_gs_data(
     schema: str,
     schema_mapping: dict,
     metadata_cls: type[Marc21Metadata] | type[LOMMetadata] | None = None,
-) -> dict | None:
+) -> tuple[str, dict] | None:
     data = record.dumps()
 
     if data["access"]["record"] != "public":
@@ -181,14 +181,13 @@ def _get_gs_data(
             "status": original_access_status,
         },
     }
-    data = {
+    return pid, {
         "metadata": metadata,
         "original": original,
     }
-    return data
 
 
-def map_metadata_from_a_to_b(
+def map_metadata_from_a_to_b(  # noqa: PLR0917
     record: Record,
     serializer_cls: GlobalSearchSerializerType,
     schema: str,
@@ -204,10 +203,17 @@ def map_metadata_from_a_to_b(
     }
     record_serializer = serializer_cls()
 
-    data = _get_gs_data(record, record_serializer, schema, schema_mapping, metadata_cls)
-    if data is None:
+    result = _get_gs_data(
+        record,
+        record_serializer,
+        schema,
+        schema_mapping,
+        metadata_cls,
+    )
+    if result is None:
         return
 
+    pid, data = result
     try:
         current_records_global_search.records_service.create_or_update(
             identity=identity,
@@ -219,7 +225,7 @@ def map_metadata_from_a_to_b(
         current_app.logger.warning(msg, pid, error)
 
 
-def map_metadata_from_a_to_b_many(
+def map_metadata_from_a_to_b_many(  # noqa: PLR0917
     records: list[Record],
     serializer_cls: GlobalSearchSerializerType,
     schema: str,
@@ -238,15 +244,16 @@ def map_metadata_from_a_to_b_many(
 
     gs_data = []
     for record in records:
-        data = _get_gs_data(
+        result = _get_gs_data(
             record,
             record_serializer,
             schema,
             schema_mapping,
             metadata_cls,
         )
-        if data is None:
+        if result is None:
             continue
+        _, data = result
         gs_data.append(data)
 
     if not gs_data:
@@ -254,7 +261,8 @@ def map_metadata_from_a_to_b_many(
         return
 
     current_app.logger.info(
-        f"Create or update batch global search records for schema {schema}",
+        "Create or update batch global search records for schema %s",
+        schema,
     )
     result = current_records_global_search.records_service.create_or_update_batch(
         identity=identity,
@@ -265,7 +273,8 @@ def map_metadata_from_a_to_b_many(
     for res in result.results:
         if res.errors:
             current_app.logger.warning(
-                "The following errors appeared for the bulk update %s", res.errors
+                "The following errors appeared for the bulk update %s",
+                res.errors,
             )
 
 
@@ -289,7 +298,7 @@ class ComponentOp(Operation):
         self._schema = schema
         self._identity = identity
 
-    def on_post_commit(  # ty: ignore[invalid-method-override]
+    def on_post_commit(  # ty: ignore[lost-keyword-for-regular-parameter]
         self,
         _: UnitOfWork,
     ) -> None:

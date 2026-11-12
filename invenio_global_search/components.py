@@ -140,27 +140,19 @@ def _get_record_access_status(access_obj: dict) -> str:
     )
 
 
-def map_metadata_from_a_to_b(
+def _get_gs_data(
     record: Record,
-    serializer_cls: GlobalSearchSerializerType,
+    record_serializer: (
+        LOMRecordJSONSerializer | Marc21RecordJSONSerializer | RDMRecordJSONSerializer
+    ),
     schema: str,
-    identity: Identity,
+    schema_mapping: dict,
     metadata_cls: type[Marc21Metadata] | type[LOMMetadata] | None = None,
-    uow: UnitOfWork | None = None,
-) -> None:
-    """Func."""
-    schema_mapping = {
-        "rdm": RDMRecordServiceConfig,
-        "lom": LOMRecordServiceConfig,
-        "marc21": Marc21RecordServiceConfig,
-    }
-
-    record_serializer = serializer_cls()
-
+) -> dict | None:
     data = record.dumps()
 
     if data["access"]["record"] != "public":
-        return
+        return None
 
     original_access_status = _get_record_access_status(data["access"])
 
@@ -175,7 +167,7 @@ def map_metadata_from_a_to_b(
     except Exception:
         msg = "Record pid: %s with schema %s has a serialization error."
         current_app.logger.exception(msg, pid, schema)
-        return
+        return None
 
     service_config = schema_mapping[schema].build(current_app)
     link = service_config.links_item["self_html"].expand(record, {})
@@ -193,6 +185,28 @@ def map_metadata_from_a_to_b(
         "metadata": metadata,
         "original": original,
     }
+    return data
+
+
+def map_metadata_from_a_to_b(
+    record: Record,
+    serializer_cls: GlobalSearchSerializerType,
+    schema: str,
+    identity: Identity,
+    metadata_cls: type[Marc21Metadata] | type[LOMMetadata] | None = None,
+    uow: UnitOfWork | None = None,
+) -> None:
+    """Func."""
+    schema_mapping = {
+        "rdm": RDMRecordServiceConfig,
+        "lom": LOMRecordServiceConfig,
+        "marc21": Marc21RecordServiceConfig,
+    }
+    record_serializer = serializer_cls()
+
+    data = _get_gs_data(record, record_serializer, schema, schema_mapping, metadata_cls)
+    if data is None:
+        return
 
     try:
         current_records_global_search.records_service.create_or_update(
@@ -224,42 +238,11 @@ def map_metadata_from_a_to_b_many(
 
     gs_data = []
     for record in records:
-        data = record.dumps()
-
-        if data["access"]["record"] != "public":
-            continue
-
-        original_access_status = _get_record_access_status(data["access"])
-
-        obj = (
-            metadata_cls(json=data["metadata"])  # ty: ignore[unknown-argument]
-            if metadata_cls
-            else data
+        data = _get_gs_data(
+            record, record_serializer, schema, schema_mapping, metadata_cls
         )
-        pid = record["id"]
-        try:
-            metadata = record_serializer.dump_obj(obj)
-        except Exception:
-            msg = "Record pid: %s with schema %s has a serialization error."
-            current_app.logger.exception(msg, pid, schema)
+        if data is None:
             continue
-
-        service_config = schema_mapping[schema].build(current_app)
-        link = service_config.links_item["self_html"].expand(record, {})
-
-        original = {
-            "view": link,
-            "schema": schema,
-            "pid": pid,
-            "created": data["created"],
-            "access": {
-                "status": original_access_status,
-            },
-        }
-        data = {
-            "metadata": metadata,
-            "original": original,
-        }
         gs_data.append(data)
 
     current_app.logger.info(

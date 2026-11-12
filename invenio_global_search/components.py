@@ -239,20 +239,26 @@ def map_metadata_from_a_to_b_many(
     gs_data = []
     for record in records:
         data = _get_gs_data(
-            record, record_serializer, schema, schema_mapping, metadata_cls
+            record, record_serializer, schema, schema_mapping, metadata_cls,
         )
         if data is None:
             continue
         gs_data.append(data)
 
     current_app.logger.info(
-        f"Create or update batch global search records for schema {schema}"
+        f"Create or update batch global search records for schema {schema}",
     )
-    current_records_global_search.records_service.create_or_update_batch(
+    result = current_records_global_search.records_service.create_or_update_batch(
         identity=identity,
         data=gs_data,
         uow=uow,
     )
+
+    for res in result.results:
+        if res.errors:
+            current_app.logger.warning(
+                "The following errors appeared for the bulk update %s", res.errors
+            )
 
 
 class ComponentOp(Operation):

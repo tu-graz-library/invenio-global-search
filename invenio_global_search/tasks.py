@@ -10,11 +10,9 @@ from flask import current_app
 from invenio_access.permissions import system_identity
 from invenio_drafts_resources.records import Record
 from invenio_records_global_search.records.api import GlobalSearchRecord
-from invenio_records_resources.services import RecordService
 
 from .components import (
     GlobalSearchSerializerType,
-    map_metadata_from_a_to_b,
     map_metadata_from_a_to_b_many,
 )
 from .serializers import (
@@ -34,7 +32,7 @@ def _base_rebuild_database_fn(
     record_ids = [
         rec_id
         for (rec_id,) in record_model_cls.model_cls.query.with_entities(
-            record_model_cls.model_cls.id
+            record_model_cls.model_cls.id,
         ).all()
     ]
 
@@ -54,33 +52,37 @@ def _base_update_missing_fn(
     record_model_cls: type[Record],
     serializer: GlobalSearchSerializerType,
     schema: str,
-    records_service: RecordService,
     metadata_cls: type | None = None,
 ) -> None:
-    gs_rdm_records_ids = []
+    gs_record_ids = []
     all_gs_records = GlobalSearchRecord.model_cls.query.all()
     for gs_rec in all_gs_records:
         gs_record = GlobalSearchRecord(gs_rec.data, model=gs_rec)
         if gs_record["original"]["schema"] == schema:
-            gs_rdm_records_ids.append(gs_record["original"]["pid"])
+            gs_record_ids.append(gs_record["original"]["pid"])
 
-    records = record_model_cls.model_cls.query.all()  # ty: ignore[unresolved-attribute]
-    for rec in records:
-        record = record_model_cls(rec.data, model=rec)
-        try:
-            record_item = records_service.read(system_identity, record["id"])
-        except Exception as e:  # noqa: BLE001
-            warn(f"Exception caught for record {record["id"]}: {e}", stacklevel=2)
-            continue
+    batch_size = current_app.config.get("GLOBAL_SEARCH_CLI_BATCH_SIZE", 100)
+    record_ids = [
+        rec_id
+        for (rec_id,) in record_model_cls.model_cls.query.with_entities(
+            record_model_cls.model_cls.id,
+        ).all()
+    ]
 
-        if record["id"] not in gs_rdm_records_ids:
-            map_metadata_from_a_to_b(
-                record_item._record,  # noqa: SLF001
+    for i in range(0, len(record_ids), batch_size):
+        id_batch = record_ids[i : i + batch_size]
+        records = record_model_cls.get_records(id_batch)
+        missing_records = [rec for rec in records if rec.pid.pid_value not in gs_record_ids]
+        if missing_records:
+            map_metadata_from_a_to_b_many(
+                missing_records,
                 serializer_cls=serializer,
                 metadata_cls=metadata_cls,
                 schema=schema,
                 identity=system_identity,
             )
+        else:
+            current_app.logger.info("Current batch complete in global-search")
 
 
 try:
@@ -103,7 +105,6 @@ try:
             RDMRecord,
             RDMRecordJSONSerializer,
             "rdm",
-            current_rdm_records_service,
         )
 
 except ImportError:
@@ -143,7 +144,6 @@ try:
             LOMRecord,
             LOMRecordJSONSerializer,
             "lom",
-            current_records_lom.records_service,
             metadata_cls=LOMMetadata,
         )
 
@@ -184,7 +184,6 @@ try:
             Marc21Record,
             Marc21RecordJSONSerializer,
             "marc21",
-            current_records_marc21.records_service,
             metadata_cls=Marc21Metadata,
         )
 

@@ -140,26 +140,19 @@ def _get_record_access_status(access_obj: dict) -> str:
     )
 
 
-def map_metadata_from_a_to_b(
+def _get_gs_data(
     record: Record,
-    serializer_cls: GlobalSearchSerializerType,
+    record_serializer: (
+        LOMRecordJSONSerializer | Marc21RecordJSONSerializer | RDMRecordJSONSerializer
+    ),
     schema: str,
-    identity: Identity,
+    schema_mapping: dict,
     metadata_cls: type[Marc21Metadata] | type[LOMMetadata] | None = None,
-) -> None:
-    """Func."""
-    schema_mapping = {
-        "rdm": RDMRecordServiceConfig,
-        "lom": LOMRecordServiceConfig,
-        "marc21": Marc21RecordServiceConfig,
-    }
-
-    record_serializer = serializer_cls()
-
+) -> tuple[str, dict] | None:
     data = record.dumps()
 
     if data["access"]["record"] != "public":
-        return
+        return None
 
     original_access_status = _get_record_access_status(data["access"])
 
@@ -174,7 +167,7 @@ def map_metadata_from_a_to_b(
     except Exception:
         msg = "Record pid: %s with schema %s has a serialization error."
         current_app.logger.exception(msg, pid, schema)
-        return
+        return None
 
     service_config = schema_mapping[schema].build(current_app)
     link = service_config.links_item["self_html"].expand(record, {})
@@ -188,19 +181,101 @@ def map_metadata_from_a_to_b(
             "status": original_access_status,
         },
     }
-    data = {
+    return pid, {
         "metadata": metadata,
         "original": original,
     }
 
+
+def map_metadata_from_a_to_b(  # noqa: PLR0917
+    record: Record,
+    serializer_cls: GlobalSearchSerializerType,
+    schema: str,
+    identity: Identity,
+    metadata_cls: type[Marc21Metadata] | type[LOMMetadata] | None = None,
+    uow: UnitOfWork | None = None,
+) -> None:
+    """Func."""
+    schema_mapping = {
+        "rdm": RDMRecordServiceConfig,
+        "lom": LOMRecordServiceConfig,
+        "marc21": Marc21RecordServiceConfig,
+    }
+    record_serializer = serializer_cls()
+
+    result = _get_gs_data(
+        record,
+        record_serializer,
+        schema,
+        schema_mapping,
+        metadata_cls,
+    )
+    if result is None:
+        return
+
+    pid, data = result
     try:
         current_records_global_search.records_service.create_or_update(
             identity=identity,
             data=data,
+            uow=uow,
         )
     except ValidationError as error:
         msg = "GLOBAL SEARCH pid: %s has following validation error: %s"
         current_app.logger.warning(msg, pid, error)
+
+
+def map_metadata_from_a_to_b_many(  # noqa: PLR0917
+    records: list[Record],
+    serializer_cls: GlobalSearchSerializerType,
+    schema: str,
+    identity: Identity,
+    metadata_cls: type[Marc21Metadata] | type[LOMMetadata] | None = None,
+    uow: UnitOfWork | None = None,
+) -> None:
+    """Func."""
+    schema_mapping = {
+        "rdm": RDMRecordServiceConfig,
+        "lom": LOMRecordServiceConfig,
+        "marc21": Marc21RecordServiceConfig,
+    }
+
+    record_serializer = serializer_cls()
+
+    gs_data = []
+    for record in records:
+        result = _get_gs_data(
+            record,
+            record_serializer,
+            schema,
+            schema_mapping,
+            metadata_cls,
+        )
+        if result is None:
+            continue
+        _, data = result
+        gs_data.append(data)
+
+    if not gs_data:
+        current_app.logger.info("Empty global search batch after mapping")
+        return
+
+    current_app.logger.info(
+        "Create or update batch global search records for schema %s",
+        schema,
+    )
+    result = current_records_global_search.records_service.create_or_update_batch(
+        identity=identity,
+        data=gs_data,
+        uow=uow,
+    )
+
+    for res in result.results:
+        if res.errors:
+            current_app.logger.warning(
+                "The following errors appeared for the bulk update %s",
+                res.errors,
+            )
 
 
 class ComponentOp(Operation):
@@ -223,7 +298,7 @@ class ComponentOp(Operation):
         self._schema = schema
         self._identity = identity
 
-    def on_post_commit(  # ty: ignore[invalid-method-override]
+    def on_post_commit(  # ty: ignore[lost-keyword-for-regular-parameter]
         self,
         _: UnitOfWork,
     ) -> None:

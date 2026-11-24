@@ -5,6 +5,14 @@ SPDX-License-Identifier: MIT
 
 # Changes
 
+## Version v0.9.0 (released 2026-11-24)
+
+- fix: black ruff ty
+- feat(tasks): optimize update-missing funcs
+- feat: show errors from bulk update
+- refactor: extract common gs mapping
+- feat(cli): optimize rebuild_database fn with batch updates
+
 ## Version v0.8.1 (released 2026-11-04)
 
 - fix(mapping): set access status based on available fields

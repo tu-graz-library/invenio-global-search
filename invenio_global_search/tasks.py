@@ -13,6 +13,7 @@ from invenio_records_global_search.records.api import GlobalSearchRecord
 
 from .components import (
     GlobalSearchSerializerType,
+    create_update_global_search_record_many,
     map_metadata_from_a_to_b_many,
 )
 from .serializers import (
@@ -20,6 +21,7 @@ from .serializers import (
     Marc21RecordJSONSerializer,
     RDMRecordJSONSerializer,
 )
+from .utils import schema_mapping
 
 
 def _base_rebuild_database_fn(
@@ -41,13 +43,14 @@ def _base_rebuild_database_fn(
     for i in range(0, len(record_ids), batch_size):
         id_batch = record_ids[i : i + batch_size]
         records = record_model_cls.get_records(id_batch)
-        map_metadata_from_a_to_b_many(
+        gs_data = map_metadata_from_a_to_b_many(
             records,
             serializer_cls=serializer,
+            schema_mapping=schema_mapping,
             metadata_cls=metadata_cls,
             schema=schema,
-            identity=system_identity,
         )
+        create_update_global_search_record_many(system_identity, gs_data, schema)
 
 
 def _base_update_missing_fn(
@@ -80,13 +83,14 @@ def _base_update_missing_fn(
             rec for rec in records if rec.pid.pid_value not in gs_record_ids
         ]
         if missing_records:
-            map_metadata_from_a_to_b_many(
+            gs_data = map_metadata_from_a_to_b_many(
                 missing_records,
                 serializer_cls=serializer,
+                schema_mapping=schema_mapping,
                 metadata_cls=metadata_cls,
                 schema=schema,
-                identity=system_identity,
             )
+            create_update_global_search_record_many(system_identity, gs_data, schema)
         else:
             current_app.logger.info("Current batch complete in global-search")
 

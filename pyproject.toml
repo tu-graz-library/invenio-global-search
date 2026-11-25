@@ -32,6 +32,9 @@ rdm = [
   "invenio-rdm-records>=18.0.0",
 ]
 tests = [
+  "invenio-records-lom>=0.12.0",
+  "invenio-records-marc21>=0.17.0",
+  "invenio-rdm-records>=18.0.0",
   "invenio-app>=2.0.0",
   "invenio-search[opensearch2]>=3.0.0",
   "pytest-black>=0.6.0",
@@ -88,6 +91,7 @@ ignore = [
   "TID252",
   "UP009",
   "PLC0415",
+  "S101",
 ]
 
 [tool.ty.environment]
